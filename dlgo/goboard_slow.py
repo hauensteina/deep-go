@@ -31,13 +31,13 @@ class Move():
         return Move( point=point)
 
     @classmethod
-    #----------------------------
-    def pass_turn( cls, point):
+    #-----------------------
+    def pass_turn( cls):
         return Move( is_pass=True)
 
     @classmethod
-    #------------------------
-    def resign( cls, point):
+    #------------------
+    def resign( cls):
         return Move( is_resign=True)
 
 # Totally connected stones of the same color
@@ -51,7 +51,7 @@ class GoString():
 
     #----------------------------------
     def remove_liberty( self, point):
-        self.liberties.rempve( point)
+        self.liberties.remove( point)
 
     #-------------------------------
     def add_liberty( self, point):
@@ -66,7 +66,7 @@ class GoString():
     @property
     #------------------------
     def num_liberties(self):
-        return len( self, liberties)
+        return len( self.liberties)
 
     #--------------------------
     def __eq__( self, other):
@@ -81,7 +81,7 @@ class Board():
     def __init__( self, num_rows, num_cols):
         self.num_rows = num_rows
         self.num_cols = num_cols
-        self._grid = [] # A list of strings
+        self._grid = {} # A dict of Go-strings
 
     #----------------------------------------
     def place_stone( self, player, point):
@@ -136,7 +136,7 @@ class Board():
     #------------------------------------
     def _remove_string( self, string):
         for point in string.stones:
-            for neighbor in point.neighbors:
+            for neighbor in point.neighbors():
                 neighbor_string = self._grid.get( neighbor)
                 if neighbor_string is None:
                     continue
@@ -160,12 +160,12 @@ class GameState:
             next_board.place_stone( self.next_player, move.point)
         else:
             next_board = self.board
-        return gameState( next_board, self.next_player.other, self, move)
+        return GameState( next_board, self.next_player.other, self, move)
 
     @classmethod
     #----------------------------------
     def new_game( cls, board_size):
-        if isinstance( boardsize, int):
+        if isinstance( board_size, int):
             board_size = (board_size, board_size)
         board = Board( *board_size)
         return GameState( board, Player.black, None, None)

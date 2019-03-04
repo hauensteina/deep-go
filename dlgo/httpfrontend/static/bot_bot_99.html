@@ -48,55 +48,54 @@
     <script type='text/javascript'>
 
      var BOARD_SIZE = 9
-     var jrecord = new JGO.Record(BOARD_SIZE)
-     var jboard = jrecord.jboard
-     var jsetup = new JGO.Setup(jboard, JGO.BOARD.largeWalnut)
-     var player = JGO.BLACK // next player
-     var ko = false, lastMove = false // ko coordinate and last move coordinate
-     var record = []
-     var colnames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N']
+     var COLNAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N']
+     var g_jrecord = new JGO.Record(BOARD_SIZE)
+     var g_jsetup = new JGO.Setup(g_jrecord.jboard, JGO.BOARD.largeWalnut)
+     var g_player = JGO.BLACK // next player
+     var g_ko = false, g_lastMove = false // ko coordinate and last move coordinate
+     var g_record = []
      var g_timer = null
 
      //--------------------------------
      function coordsToString(point) {
        var row = (BOARD_SIZE - 1) - point.j
        var col = point.i
-       return colnames[col] + ((row + 1).toString())
+       return COLNAMES[col] + ((row + 1).toString())
      } // coordsToString()
 
      //--------------------------------------
      function stringToCoords(move_string) {
        var colStr = move_string.substring(0, 1)
        var rowStr = move_string.substring(1)
-       var col = colnames.indexOf(colStr)
+       var col = COLNAMES.indexOf(colStr)
        var row = BOARD_SIZE - parseInt(rowStr, 10)
        return new JGO.Coordinate(col, row)
      } // stringToCoords()
 
      //-----------------------------------
      function applyMove(player, coord) {
-       var play = jboard.playMove(coord, player, ko)
+       var play = g_jrecord.jboard.playMove( coord, player, g_ko)
 
        if (play.success) {
-         record.push(coordsToString(coord))
-         node = jrecord.createNode(true)
+         g_record.push( coordsToString( coord))
+         node = g_jrecord.createNode( true)
          node.info.captures[player] += play.captures.length // tally captures
-         node.setType(coord, player) // play stone
-         node.setType(play.captures, JGO.CLEAR) // clear opponent's stones
+         node.setType( coord, player) // play stone
+         node.setType( play.captures, JGO.CLEAR) // clear opponent's stones
 
-         if (lastMove) {
-           node.setMark(lastMove, JGO.MARK.NONE) // clear previous mark
+         if (g_lastMove) {
+           node.setMark( g_lastMove, JGO.MARK.NONE) // clear previous mark
          }
-         if (ko) {
-           node.setMark(ko, JGO.MARK.NONE) // clear previous ko mark
+         if (g_ko) {
+           node.setMark( g_ko, JGO.MARK.NONE) // clear previous ko mark
          }
-         node.setMark(coord, JGO.MARK.CIRCLE) // mark move
-         lastMove = coord
+         node.setMark( coord, JGO.MARK.CIRCLE) // mark move
+         g_lastMove = coord
 
          if(play.ko)
-           node.setMark(play.ko, JGO.MARK.CIRCLE) // mark ko, too
-         ko = play.ko
-       } else alert('Illegal move: ' + play.errorMsg)
+           node.setMark (play.ko, JGO.MARK.CIRCLE) // mark ko, too
+         g_ko = play.ko
+       } else alert( 'Illegal move: ' + play.errorMsg)
      } // applyMove()
 
      // Get next move from the bot and show on board
@@ -107,21 +106,27 @@
          headers: {
            'Content-Type': 'application/json',
          },
-         body: JSON.stringify( {'board_size': BOARD_SIZE, 'moves': record}),
-       }).then( function(response) {
-         response.json().then( function(data) {
-           if (data.bot_move == 'pass' || data.bot_move == 'resign') {
-             record.push( data.bot_move)
+         body: JSON.stringify( {'board_size': BOARD_SIZE, 'moves': g_record}),
+       }).then(
+         function(response) {
+           response.json().then(
+             function(data) {
+               if (data.bot_move == 'pass' || data.bot_move == 'resign') {
+                 g_record.push( data.bot_move)
+               }
+               else {
+                 var botCoord = stringToCoords( data.bot_move)
+                 applyMove( g_player, botCoord)
+                 g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+               }
+             }
+           )
+         }
+       ).catch(
+           function(error) {
+             console.log( error)
            }
-           else {
-             var botCoord = stringToCoords( data.bot_move)
-             applyMove( player, botCoord)
-             player =  (player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
-           }
-         })
-       }).catch( function(error) {
-         console.log( error)
-       })
+         )
      } // getBotMove()
 
      //------------------------------
@@ -129,21 +134,19 @@
        $('#btn_new').click(
          function() {
            console.log( 'new clicked')
-           jrecord.jboard.clear()
-           jrecord.root = jrecord.current = null
-           jrecord.info = {}
-           record = []
+           g_jrecord.jboard.clear()
+           g_jrecord.root = g_jrecord.current = null
+           g_jrecord.info = {}
+           g_record = []
            waitingForBot = false
            return false }
        )
-
        $('#btn_next').click(
          function() {
            console.log( 'next clicked')
            getBotMove()
            return false }
        )
-
        $('#btn_play').click(
          function() {
            console.log( 'play clicked')
@@ -154,14 +157,12 @@
              1000)
            return false }
        )
-
        $('#btn_pause').click(
          function() {
            console.log( 'pause clicked')
            clearInterval( g_timer)
            return false }
        )
-
        $('#btn_score').click(
          function() {
            console.log( 'score clicked')
@@ -173,8 +174,8 @@
      function main() {
        set_btn_handlers()
 
-       jsetup.setOptions({stars: {points:5}})
-       jsetup.create('board', function(canvas) {})
+       g_jsetup.setOptions({stars: {points:5}})
+       g_jsetup.create('board', function(canvas) {})
      } // main()
 
      main()

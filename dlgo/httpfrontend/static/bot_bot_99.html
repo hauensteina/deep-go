@@ -49,12 +49,30 @@
 
      var BOARD_SIZE = 9
      var COLNAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N']
+
      var g_jrecord = new JGO.Record(BOARD_SIZE)
      var g_jsetup = new JGO.Setup(g_jrecord.jboard, JGO.BOARD.largeWalnut)
-     var g_player = JGO.BLACK // next player
-     var g_ko = false, g_lastMove = false // ko coordinate and last move coordinate
-     var g_record = []
+     //var g_jsetup = new JGO.Setup(g_jrecord.jboard, JGO.BOARD.large)
+     var g_player = null
+     var g_ko = null // ko coordinate
+     var g_lastMove = null // last move coordinate
+     var g_record = null
      var g_timer = null
+
+     //------------------------
+     function reset_game() {
+       // Instantiate globals
+       g_player = JGO.BLACK // next player
+       g_ko = false
+       g_lastMove = false
+       g_record = []
+       g_timer = null
+
+       // Clear things
+       g_jrecord.jboard.clear()
+       g_jrecord.root = g_jrecord.current = null
+       g_jrecord.info = {}
+     } // reset_game()
 
      //--------------------------------
      function coordsToString(point) {
@@ -99,6 +117,7 @@
          g_ko = play.ko
        }
        else {
+         clearInterval( g_timer)
          tstr = player + coord
          alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
        }
@@ -107,7 +126,7 @@
      // Get next move from the bot and show on board
      //-----------------------------------------------
      function getBotMove() {
-       //console.log( g_record)
+       console.log( g_record)
        fetch( '/select-move/random', {
          method: 'POST',
          headers: {
@@ -136,52 +155,75 @@
        )
      } // getBotMove()
 
+     //------------------------
+     function isGameOver() {
+       var len = g_record.length
+       if (len > 1) {
+         if (g_record[ len - 1] == 'pass' && g_record[ len - 2] == 'pass') {
+           return true
+         }
+       }
+       return false
+     } // isGameOver()
+
+     // Play a game. Start another when over, or alert
+     //-------------------------------------------------
+     function autoPlay() {
+       console.log( 'autoplay')
+       $('#status').html( 'playing...')
+       g_timer = setInterval(
+         function() {
+           if (isGameOver()) {
+             clearInterval( g_timer)
+             //alert( 'Game Over')
+             newGame()
+             autoPlay()
+           }
+           else {
+             getBotMove()
+           }
+         },
+         100)
+       return false
+     } // autoPlay()
+
+     //---------------------
+     function newGame() {
+       console.log( 'new game')
+       $('#status').html( '&nbsp;')
+       clearInterval( g_timer)
+       reset_game()
+
+       // Start position for testing
+       initpos =
+         ["A8", "D3", "C6", "H4", "J2", "J9", "H6", "J4", "E7", "A6", "A9", "A1", "F9", "H5", "F1", "C3", "G5", "F2", "F4", "C8", "F3", "J6", "D4", "B4", "B5", "G2", "B2", "A3", "G3", "E1", "E4", "B9", "B3", "B1", "J1", "D6", "E5", "G1", "A4", "J8", "C2", "J5", "F6", "H2", "H1", "E2", "F8", "D1", "D2", "H3", "E3", "C4", "B7", "A2", "C9", "C1", "E6", "B2", "H7", "A5", "F5", "C7", "H9", "C2", "C5", "F7", "G8", "G7", "H8", "D9", "E9", "G4", "G6", "D5", "J7", "G7", "A7", "D8", "B8", "E8", "C9", "J9", "B6", "B9", "J8", "C5", "C6", "B6", "B8", "C6", "D7", "A8", "B7", "C9", "F7", "A4"]
+       initpos = []
+       for (move_string of initpos) {
+         if (move_string == 'pass' || move_string == 'resign') {
+           // pass
+         }
+         else {
+           coord = stringToCoords( move_string)
+           applyMove( g_player, coord)
+         }
+         g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+       } // for
+       return false
+     } // newGame()
+
      //------------------------------
      function set_btn_handlers() {
-       $('#btn_new').click(
-         function() {
-           console.log( 'new clicked')
-           clearInterval( g_timer)
-           g_jrecord.jboard.clear()
-           g_jrecord.root = g_jrecord.current = null
-           g_jrecord.info = {}
-           g_record = []
-           g_player = JGO.BLACK
+       $('#btn_new').click( newGame)
 
-           // Start position for testing
-           initpos =
-             ["A8", "D3", "C6", "H4", "J2", "J9", "H6", "J4", "E7", "A6", "A9", "A1", "F9", "H5", "F1", "C3", "G5", "F2", "F4", "C8", "F3", "J6", "D4", "B4", "B5", "G2", "B2", "A3", "G3", "E1", "E4", "B9", "B3", "B1", "J1", "D6", "E5", "G1", "A4", "J8", "C2", "J5", "F6", "H2", "H1", "E2", "F8", "D1", "D2", "H3", "E3", "C4", "B7", "A2", "C9", "C1", "E6", "B2", "H7", "A5", "F5", "C7", "H9", "C2", "C5", "F7", "G8", "G7", "H8", "D9", "E9", "G4", "G6", "D5", "J7", "G7", "A7", "D8", "B8", "E8", "C9", "J9", "B6", "B9", "J8", "C5", "C6", "B6", "B8", "C6", "D7", "A8", "B7", "C9", "F7", "A4"]
-           initpos = []
-           for (move_string of initpos) {
-             if (move_string == 'pass' || move_string == 'resign') {
-               // pass
-             }
-             else {
-               coord = stringToCoords( move_string)
-               applyMove( g_player, coord)
-             }
-             g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
-           } // for
-           return false
-         } // func
-       ) // click
        $('#btn_next').click(
          function() {
            console.log( 'next clicked')
            getBotMove()
            return false }
        )
-       $('#btn_play').click(
-         function() {
-           console.log( 'play clicked')
-           $('#status').html( 'playing...')
-           g_timer = setInterval(
-             function() {
-               getBotMove()
-             },
-             100)
-           return false }
-       )
+
+       $('#btn_play').click( autoPlay)
+
        $('#btn_pause').click(
          function() {
            console.log( 'pause clicked')
@@ -198,6 +240,7 @@
 
      //------------------
      function main() {
+       reset_game()
        set_btn_handlers()
        g_jsetup.setOptions({stars: {points:5}})
        g_jsetup.create('board', function(canvas) {})

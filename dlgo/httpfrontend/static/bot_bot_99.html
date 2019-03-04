@@ -74,6 +74,8 @@
 
      //-----------------------------------
      function applyMove(player, coord) {
+       console.log( player)
+       console.log( coord)
        var play = g_jrecord.jboard.playMove( coord, player, g_ko)
 
        if (play.success) {
@@ -95,12 +97,17 @@
          if(play.ko)
            node.setMark (play.ko, JGO.MARK.CIRCLE) // mark ko, too
          g_ko = play.ko
-       } else alert( 'Illegal move: ' + play.errorMsg)
+       }
+       else {
+         tstr = player + coord
+         alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
+       }
      } // applyMove()
 
      // Get next move from the bot and show on board
      //-----------------------------------------------
      function getBotMove() {
+       //console.log( g_record)
        fetch( '/select-move/random', {
          method: 'POST',
          headers: {
@@ -117,16 +124,16 @@
                else {
                  var botCoord = stringToCoords( data.bot_move)
                  applyMove( g_player, botCoord)
-                 g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
                }
+               g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
              }
            )
          }
        ).catch(
-           function(error) {
-             console.log( error)
-           }
-         )
+         function(error) {
+           console.log( error)
+         }
+       )
      } // getBotMove()
 
      //------------------------------
@@ -139,9 +146,25 @@
            g_jrecord.root = g_jrecord.current = null
            g_jrecord.info = {}
            g_record = []
-           waitingForBot = false
-           return false }
-       )
+           g_player = JGO.BLACK
+
+           // Start position for testing
+           initpos =
+             ["A8", "D3", "C6", "H4", "J2", "J9", "H6", "J4", "E7", "A6", "A9", "A1", "F9", "H5", "F1", "C3", "G5", "F2", "F4", "C8", "F3", "J6", "D4", "B4", "B5", "G2", "B2", "A3", "G3", "E1", "E4", "B9", "B3", "B1", "J1", "D6", "E5", "G1", "A4", "J8", "C2", "J5", "F6", "H2", "H1", "E2", "F8", "D1", "D2", "H3", "E3", "C4", "B7", "A2", "C9", "C1", "E6", "B2", "H7", "A5", "F5", "C7", "H9", "C2", "C5", "F7", "G8", "G7", "H8", "D9", "E9", "G4", "G6", "D5", "J7", "G7", "A7", "D8", "B8", "E8", "C9", "J9", "B6", "B9", "J8", "C5", "C6", "B6", "B8", "C6", "D7", "A8", "B7", "C9", "F7", "A4"]
+           initpos = []
+           for (move_string of initpos) {
+             if (move_string == 'pass' || move_string == 'resign') {
+               // pass
+             }
+             else {
+               coord = stringToCoords( move_string)
+               applyMove( g_player, coord)
+             }
+             g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+           } // for
+           return false
+         } // func
+       ) // click
        $('#btn_next').click(
          function() {
            console.log( 'next clicked')
@@ -156,7 +179,7 @@
              function() {
                getBotMove()
              },
-             1000)
+             100)
            return false }
        )
        $('#btn_pause').click(

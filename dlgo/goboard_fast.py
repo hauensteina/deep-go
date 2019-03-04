@@ -1,3 +1,6 @@
+
+from pdb import set_trace as BP
+
 import copy
 from dlgo.gotypes import Player, Point
 from dlgo.scoring import compute_game_result
@@ -180,6 +183,7 @@ class Board():
             # Add empty point hash code.
             self._hash ^= zobrist.HASH_CODE[point, None]
 
+    #------------------------------------------
     def is_self_capture(self, player, point):
         friendly_strings = []
         for neighbor in self.neighbor_table[point]:

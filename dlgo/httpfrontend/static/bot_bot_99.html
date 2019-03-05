@@ -5,7 +5,7 @@
     <meta charset='utf-8'>
     <title>Board</title>
 
-    <!-- Modules -->
+    <!-- Imported modules -->
     <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
     <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
@@ -60,6 +60,9 @@
      var g_record = null
      var g_timer = null
      var g_waiting_for_bot = null
+     var g_last_x = -1
+     var g_last_y = -1
+     var g_last_hover = false
 
      //------------------------
      function reset_game() {
@@ -254,7 +257,58 @@
        reset_game()
        set_btn_handlers()
        g_jsetup.setOptions({stars: {points:5}})
-       g_jsetup.create('board', function(canvas) {})
+       g_jsetup.create('board',
+         function(canvas) {
+           //----------------------------
+           canvas.addListener('click',
+             function(coord, ev) {
+               if (g_waiting_for_bot) {
+                 return
+               }
+               var jboard = g_jrecord.jboard
+               // clear hover away
+               if (g_last_hover) { jboard.setType(new JGO.Coordinate( g_last_x, g_last_y), JGO.CLEAR) }
+               g_last_hover = false
+               applyMove( g_player, coord);
+               g_player = (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+             }
+           ) // click
+
+           //------------------------------
+           canvas.addListener('mousemove',
+             function(coord, ev) {
+               var jboard = g_jrecord.jboard
+               if(coord.i == -1 || coord.j == -1 || (coord.i == g_last_x && coord.j == g_last_y))
+                 return
+
+               if (g_last_hover) // clear previous hover if there was one
+                 jboard.setType(new JGO.Coordinate( g_last_x, g_last_y), JGO.CLEAR)
+
+               g_last_x = coord.i
+               g_last_y = coord.j
+
+               if (jboard.getType( coord) == JGO.CLEAR && jboard.getMark( coord) == JGO.MARK.NONE) {
+                 jboard.setType( coord, g_player == JGO.WHITE ? JGO.DIM_WHITE : JGO.DIM_BLACK)
+                 g_last_hover = true
+               }
+               else {
+                 g_last_hover = false
+               }
+             }
+           ) // mousemove
+
+           //----------------------------
+           canvas.addListener('mouseout',
+             function(ev) {
+               var jboard = g_jrecord.jboard
+               if (g_last_hover)
+                 jboard.setType(new JGO.Coordinate( g_last_x, g_last_y), JGO.CLEAR);
+
+               g_last_hover = false;
+             }
+           ) // mouseout
+         }
+       )// create board
      } // main()
 
      main()

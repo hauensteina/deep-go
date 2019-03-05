@@ -10,6 +10,7 @@ from dlgo import agent
 from dlgo import goboard_fast as goboard
 from dlgo.utils import coords_from_point
 from dlgo.utils import point_from_coords
+from dlgo.scoring import compute_game_result
 
 __all__ = [
     'get_web_app',
@@ -40,6 +41,8 @@ def get_web_app(bot_map):
     app = Flask(__name__, static_folder=static_path, static_url_path='/static')
 
     @app.route('/select-move/<bot_name>', methods=['POST'])
+    # Ask the named bot for the next move
+    #--------------------------------------
     def select_move(bot_name):
         content = request.json
         board_size = content['board_size']
@@ -65,5 +68,25 @@ def get_web_app(bot_map):
             'bot_move': bot_move_str,
             'diagnostics': bot_agent.diagnostics()
         })
+
+    @app.route('/score', methods=['POST'])
+    # Score the current position
+    #-----------------------------
+    def score():
+        content = request.json
+        board_size = content['board_size']
+        game_state = goboard.GameState.new_game( board_size)
+        # Replay the game up to this point.
+        for move in content['moves']:
+            if move == 'pass':
+                next_move = goboard.Move.pass_turn()
+            elif move == 'resign':
+                next_move = goboard.Move.resign()
+            else:
+                next_move = goboard.Move.play( point_from_coords(move))
+            game_state = game_state.apply_move( next_move)
+
+        res = compute_game_result( game_state)
+        return jsonify( {'result': res})
 
     return app

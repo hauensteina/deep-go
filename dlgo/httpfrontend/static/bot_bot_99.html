@@ -169,6 +169,37 @@
        )
      } // getBotMove()
 
+     // Score the current position
+     //------------------------------
+     function scorePosition()
+     {
+       if (g_waiting_for_bot) {
+         console.log( 'still waiting')
+         return
+       }
+       fetch( '/score', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify( {'board_size': BOARD_SIZE, 'moves': g_record}),
+       }).then(
+         function(response) {
+           response.json().then(
+             function(data) {
+               var black_points = data.result[0]
+               var white_points = data.result[1]
+               $('#status').html( `Black: ${black_points}    White: ${white_points}`)
+             }
+           )
+         }
+       ).catch(
+         function(error) {
+           console.log( error)
+         }
+       )
+     } // scorePosition()
+
      //------------------------
      function isGameOver() {
        var len = g_record.length
@@ -189,9 +220,9 @@
          function() {
            if (isGameOver()) {
              clearInterval( g_timer)
-             //alert( 'Game Over')
-             newGame()
-             autoPlay()
+             $('#status').html( 'Game Over')
+             //newGame()
+             //autoPlay()
            }
            else {
              getBotMove()
@@ -225,6 +256,7 @@
        return false
      } // newGame()
 
+     // Set button callbacks
      //------------------------------
      function set_btn_handlers() {
        $('#btn_new').click( newGame)
@@ -248,6 +280,7 @@
        $('#btn_score').click(
          function() {
            console.log( 'score clicked')
+           scorePosition()
            return false }
        )
      } // set_btn_handlers()
@@ -257,6 +290,9 @@
        reset_game()
        set_btn_handlers()
        g_jsetup.setOptions({stars: {points:5}})
+
+       // Add mouse event listeners for the board
+       //------------------------------------------
        g_jsetup.create('board',
          function(canvas) {
            //----------------------------

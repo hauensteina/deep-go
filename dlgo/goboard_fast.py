@@ -53,7 +53,7 @@ def init_corner_table(dim):
 class IllegalMoveError(Exception):
     pass
 
-
+#=====================
 class GoString():
     """Stones that are linked by a chain of connected stones of the
     same color.
@@ -93,7 +93,7 @@ class GoString():
     def __deepcopy__(self, memodict={}):
         return GoString(self.color, self.stones, copy.deepcopy(self.liberties))
 
-
+#=====================
 class Board():
     def __init__(self, num_rows, num_cols):
         self.num_rows = num_rows
@@ -311,7 +311,7 @@ class Move():
             other.is_resign,
             other.point)
 
-
+#=====================
 class GameState():
     def __init__(self, board, next_player, previous, move):
         self.board = board

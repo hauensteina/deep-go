@@ -123,6 +123,7 @@
          clearInterval( g_timer)
          tstr = player + coord
          alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
+         //debugger
        }
      } // applyMove()
 
@@ -148,6 +149,7 @@
                g_waiting_for_bot = false
                if (data.bot_move == 'pass' || data.bot_move == 'resign') {
                  g_record.push( data.bot_move)
+                 g_ko = false
                }
                else {
                  var botCoord = stringToCoords( data.bot_move)
@@ -204,12 +206,12 @@
        reset_game()
 
        // Start position for testing
-       initpos =
-         ["A8", "D3", "C6", "H4", "J2", "J9", "H6", "J4", "E7", "A6", "A9", "A1", "F9", "H5", "F1", "C3", "G5", "F2", "F4", "C8", "F3", "J6", "D4", "B4", "B5", "G2", "B2", "A3", "G3", "E1", "E4", "B9", "B3", "B1", "J1", "D6", "E5", "G1", "A4", "J8", "C2", "J5", "F6", "H2", "H1", "E2", "F8", "D1", "D2", "H3", "E3", "C4", "B7", "A2", "C9", "C1", "E6", "B2", "H7", "A5", "F5", "C7", "H9", "C2", "C5", "F7", "G8", "G7", "H8", "D9", "E9", "G4", "G6", "D5", "J7", "G7", "A7", "D8", "B8", "E8", "C9", "J9", "B6", "B9", "J8", "C5", "C6", "B6", "B8", "C6", "D7", "A8", "B7", "C9", "F7", "A4"]
+       var initpos =
+         ["B9", "A6", "A5", "G7", "C7", "D5", "A3", "F7", "J5", "E1", "G6", "F8", "G4", "C2", "D7", "A4", "A7", "E2", "B5", "J7", "A2", "H5", "A9", "J4", "C8", "B8", "G3", "F6", "H2", "J9", "B6", "G2", "J2", "J3", "A1", "F3", "G5", "C5", "E7", "G1", "H4", "H6", "F4", "F5", "B1", "B4", "F2", "D8", "A8", "J6", "A6", "D2", "D1", "E8", "D6", "H1", "E3", "J1", "H3", "C9", "H9", "C4", "J5", "D3", "B2", "G8", "F3", "G9", "C1", "B3", "H7", "E4", "B7", "D1", "B1", "A2", "F1", "J3", "A1", "F9", "C6", "D4", "H1", "A3", "G2", "D9", "J8", "H6", "J4", "J6", "J7", "H8", "E6", "C1", "H5", "E5", "H6", "B2", "A1", "J9"]
        initpos = []
        for (move_string of initpos) {
          if (move_string == 'pass' || move_string == 'resign') {
-           // pass
+           g_ko = false
          }
          else {
            coord = stringToCoords( move_string)

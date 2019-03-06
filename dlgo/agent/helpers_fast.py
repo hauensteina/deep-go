@@ -1,13 +1,25 @@
+#!/usr/bin/env python
+
+# /********************************************************************
+# Filename: helpers_fast.py
+# Creation Date: Mar, 2019
+# **********************************************************************/
+#
+# Check if a point is an eye.
+# All four neighbors and three shoulders must be player color.
+#
+
+from pdb import set_trace as BP
 from dlgo.gotypes import Point
 
 __all__ = [
     'is_point_an_eye',
 ]
 
-
+#--------------------------------------------
 def is_point_an_eye(board, point, color):
-    if board.get(point) is not None:
-        return False
+    if point is None: return False
+    if board.get(point) is not None: return False
     # All adjacent points must contain friendly stones.
     for neighbor in board.neighbors(point):
         neighbor_color = board.get(neighbor)

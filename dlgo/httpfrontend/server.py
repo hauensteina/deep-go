@@ -58,7 +58,7 @@ def get_web_app(bot_map):
             game_state = game_state.apply_move(next_move)
         bot_agent = bot_map[bot_name]
         bot_move = bot_agent.select_move(game_state)
-        if bot_move.is_pass:
+        if bot_move is None or bot_move.is_pass:
             bot_move_str = 'pass'
         elif bot_move.is_resign:
             bot_move_str = 'resign'

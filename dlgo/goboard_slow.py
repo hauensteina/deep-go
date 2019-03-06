@@ -2,11 +2,10 @@
 
 # /********************************************************************
 # Filename: goboard_slow.py
-# Author: AHN
 # Creation Date: Mar, 2019
 # **********************************************************************/
 #
-# A simple but slow go board implementation
+# A simple but slow go board implementation from 'Deep Learning and the Game of Go'
 #
 
 import os, sys

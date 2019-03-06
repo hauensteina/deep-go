@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+# /********************************************************************
+# Filename: naive_fast.py
+# Creation Date: Mar, 2019
+# **********************************************************************/
+#
+# A fast random bot implementation from 'Deep Learning and the Game of Go'
+#
+
 import numpy as np
 
 from dlgo.agent.base import Agent
@@ -5,16 +15,18 @@ from dlgo.agent.helpers_fast import is_point_an_eye
 from dlgo.goboard_fast import Move
 from dlgo.gotypes import Point
 
-
 __all__ = ['FastRandomBot']
 
-
+#=============================
 class FastRandomBot(Agent):
+
+    #--------------------------
     def __init__(self):
         Agent.__init__(self)
         self.dim = None
         self.point_cache = []
 
+    #--------------------------
     def _update_cache(self, dim):
         self.dim = dim
         rows, cols = dim
@@ -23,6 +35,7 @@ class FastRandomBot(Agent):
             for c in range(1, cols + 1):
                 self.point_cache.append(Point(row=r, col=c))
 
+    #--------------------------
     def select_move(self, game_state):
         """Choose a random valid move that preserves our own eyes."""
         dim = (game_state.board.num_rows, game_state.board.num_cols)
@@ -34,8 +47,8 @@ class FastRandomBot(Agent):
         for i in idx:
             p = self.point_cache[i]
             if game_state.is_valid_move(Move.play(p)) and \
-                    not is_point_an_eye(game_state.board,
-                                        p,
-                                        game_state.next_player):
+               not is_point_an_eye(game_state.board,
+                                   p,
+                                   game_state.next_player):
                 return Move.play(p)
         return Move.pass_turn()

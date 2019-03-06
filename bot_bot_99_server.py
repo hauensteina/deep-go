@@ -10,8 +10,14 @@
 #
 
 from dlgo.agent.naive_fast import FastRandomBot
+from dlgo import mcts
 from dlgo.httpfrontend.server import get_web_app
 
 random_agent = FastRandomBot()
-web_app = get_web_app({'random':random_agent})
+MCTS_ROUNDS = 1000
+#MCTS_ROUNDS = 100
+MCTS_TEMPERATURE = 0.8
+mcts_agent = mcts.MCTSAgent( MCTS_ROUNDS, MCTS_TEMPERATURE)
+#web_app = get_web_app({'random':random_agent})
+web_app = get_web_app({'mcts':mcts_agent})
 web_app.run()

@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+# /********************************************************************
+# Filename: server.py
+# Author: AHN
+# Creation Date: Mar, 2019
+# **********************************************************************/
+#
+# REST-Api to get the next move from a bot, or score the game
+#
 
 from pdb import set_trace as BP
 import os
@@ -16,7 +26,7 @@ __all__ = [
     'get_web_app',
 ]
 
-
+#---------------------------
 def get_web_app(bot_map):
     """Create a flask application for serving bot moves.
 

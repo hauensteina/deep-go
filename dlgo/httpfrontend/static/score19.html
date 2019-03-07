@@ -1,13 +1,12 @@
 <!DOCTYPE HTML>
 
-<!--
-     /********************************************************************
-     Filename: score19.html
-     Author: AHN
-     Creation Date: Mar, 2019
-     **********************************************************************/
-     Web interface to load a 19x19 game from file and score it using a bot
-   -->
+<script type='text/javascript'>
+ /* Filename: score19.html
+  * Author: AHN
+  * Creation Date: Mar, 2019
+  * Web interface to load a 19x19 game from file and score it using a bot
+  */
+</script>
 
 <html lang='en'>
   <head>
@@ -42,6 +41,29 @@
     <div id='board'></div>
     <div>
       <div id='status'> &nbsp; </div>
+    </div>
+    <br>
+    <!-- Input form for sgf file upload -->
+    <!-- @@@ Write the js and python side of this -->
+    <div>
+    <form id="upload-file" method="post" enctype="multipart/form-data">
+      <table class='center'>
+        <tr>
+          <td>
+            <fieldset>
+              <input name="file" type="file">
+            </fieldset>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <fieldset>
+              <button id="upload-file-btn" type="button">Upload</button>
+            </fieldset>
+          </td>
+        </tr>
+      </table>
+    </form>
     </div>
     <br>
     <div>

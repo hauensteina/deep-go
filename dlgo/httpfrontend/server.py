@@ -17,6 +17,7 @@ from flask import jsonify
 from flask import request
 
 from dlgo.gotypes import Player, Point
+from dlgo.utils import print_board, print_move
 from dlgo import agent
 from dlgo import goboard_fast as goboard
 from dlgo.utils import coords_from_point
@@ -68,6 +69,7 @@ def get_web_app(bot_map):
             else:
                 next_move = goboard.Move.play( point_from_coords(move))
             game_state = game_state.apply_move( next_move)
+            #print_board( game_state.board)
         bot_agent = bot_map[bot_name]
         bot_move = bot_agent.select_move( game_state)
         if bot_move is None or bot_move.is_pass:

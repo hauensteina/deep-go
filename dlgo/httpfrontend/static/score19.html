@@ -136,7 +136,7 @@
 
        if (play.success) {
          g_record.push( coordsToString( coord))
-         node = g_jrecord.createNode( true)
+         var node = g_jrecord.createNode( true)
          node.info.captures[player] += play.captures.length // tally captures
          node.setType( coord, player) // play stone
          node.setType( play.captures, JGO.CLEAR) // clear opponent's stones
@@ -157,6 +157,8 @@
        else {
          clearInterval( g_timer)
          tstr = player + coord
+         var node = g_jrecord.getCurrentNode()
+         node.setMark( coord, JGO.MARK.SQUARE)
          alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
          //debugger
        }
@@ -283,6 +285,7 @@
        for (move_string of mlist) {
          if (move_string == 'pass' || move_string == 'resign') {
            g_ko = false
+           g_record.push( move_string)
          }
          else {
            coord = stringToCoords( move_string)

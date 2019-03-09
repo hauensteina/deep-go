@@ -209,9 +209,13 @@ class Board():
 
     #-------------------------------------
     def strings_in_atari( self, player):
+        return self.strings_with_liberties( player, 1)
+
+    #---------------------------------------------
+    def strings_with_liberties( self, player, n):
         strs = self._grid.values()
         strs = set(strs)
-        res = { s for s in strs if s and s.color == player and s.num_liberties == 1 }
+        res = { s for s in strs if s and s.color == player and s.num_liberties == n }
         return res
 
     #------------------------------------------

@@ -57,10 +57,24 @@ class FastSmartRandomBot(Agent):
         opp = game_state.next_player.other
         atari_strings = game_state.board.strings_in_atari( opp)
         for astr in atari_strings:
-            lib = next( iter( astr.liberties))
-            cand =  Move.play( lib)
-            if game_state.is_valid_move( cand):
-                return cand
+            for lib in astr.liberties:
+                cand =  Move.play( lib)
+                if game_state.is_valid_move( cand):
+                    return cand
+        return None
+
+    # See if we can atari stones
+    #-----------------------------------
+    def atari( self, game_state):
+        opp = game_state.next_player.other
+        lib2_strings = game_state.board.strings_with_liberties( opp, 2)
+        for astr in lib2_strings:
+            for lib in astr.liberties:
+                cand =  Move.play( lib)
+                if game_state.is_valid_move( cand):
+                    newstate = game_state.apply_move( cand)
+                    if newstate.board.get_go_string( lib).num_liberties > 1:
+                        return cand
         return None
 
     #------------------------------------
@@ -72,9 +86,9 @@ class FastSmartRandomBot(Agent):
         cand = self.capture( game_state)
         if cand:
             return cand
-
-
-
+        cand = self.atari( game_state)
+        if cand:
+            return cand
 
         dim = (game_state.board.num_rows, game_state.board.num_cols)
         if dim != self.dim:

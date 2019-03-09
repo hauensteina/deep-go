@@ -51,10 +51,25 @@ class FastSmartRandomBot(Agent):
                     return cand
         return None
 
+    # See if we can capture stones
+    #-----------------------------------
+    def capture( self, game_state):
+        opp = game_state.next_player.other
+        atari_strings = game_state.board.strings_in_atari( opp)
+        for astr in atari_strings:
+            lib = next( iter( astr.liberties))
+            cand =  Move.play( lib)
+            if game_state.is_valid_move( cand):
+                return cand
+        return None
+
     #------------------------------------
     def select_move( self, game_state):
 
         cand = self.save_atari( game_state)
+        if cand:
+            return cand
+        cand = self.capture( game_state)
         if cand:
             return cand
 

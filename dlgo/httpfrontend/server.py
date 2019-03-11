@@ -100,8 +100,8 @@ def get_web_app(bot_map):
                 next_move = goboard.Move.play( point_from_coords(move))
             game_state = game_state.apply_move( next_move)
 
-        res = compute_game_result( game_state)
-        return jsonify( {'result': res})
+        territory, res = compute_game_result( game_state)
+        return jsonify( {'result': res, 'territory': territory.__dict__ })
 
     @app.route('/sgf2list', methods=['POST'])
     # Convert sgf main var to coordinate list of moves

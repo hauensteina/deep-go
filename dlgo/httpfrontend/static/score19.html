@@ -206,6 +206,12 @@
        )
      } // getBotMove()
 
+     // Turn a server (row, col) into a JGO coordinate
+     //---------------------------------------------------
+     function rc2Jgo( row, col) {
+       return new JGO.Coordinate( col - 1, BOARD_SIZE - row)
+     } // rc2Jgo
+
      // Score the current position
      //------------------------------
      function scorePosition()
@@ -224,9 +230,20 @@
          function(response) {
            response.json().then(
              function(data) {
+               //debugger
                var black_points = data.result[0]
                var white_points = data.result[1]
                $('#status').html( `Black: ${black_points}    White: ${white_points}`)
+               var node = g_jrecord.createNode( true)
+               for (var bpoint of data.territory.black_points) {
+                 node.setMark( rc2Jgo( bpoint[0], bpoint[1]), JGO.MARK.BLACK_TERRITORY)
+               }
+               for (var wpoint of data.territory.white_points) {
+                 node.setMark( rc2Jgo( wpoint[0], wpoint[1]), JGO.MARK.WHITE_TERRITORY)
+               }
+               for (var dpoint of data.territory.dame_points) {
+                 node.setMark( rc2Jgo( dpoint[0], dpoint[1]), JGO.MARK.TRIANGLE)
+               }
              }
            )
          }

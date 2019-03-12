@@ -2,4 +2,5 @@ DerivedData
 .DS_Store
 *.xcuserstate
 *.pyc
+build
 

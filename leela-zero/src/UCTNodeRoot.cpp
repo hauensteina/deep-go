@@ -157,6 +157,19 @@ UCTNode* UCTNode::get_nopass_child(FastState& state) const {
     return nullptr;
 }
 
+// Get a child that doesn't close an eye (AHN)
+//------------------------------------------------------------
+UCTNode* UCTNode::get_noeye_child(FastState& state) const {
+    for (const auto& child : m_children) {
+        if (child->m_move == FastBoard::PASS
+            || !state.board.is_eye(state.get_to_move(), child->m_move)) {
+            return child.get();
+        }
+    }
+    return nullptr;
+} // get_noeye_child()
+
+
 // Used to find new root in UCTSearch.
 std::unique_ptr<UCTNode> UCTNode::find_child(const int move) {
     for (auto& child : m_children) {

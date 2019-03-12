@@ -80,6 +80,8 @@ public:
 
     UCTNode* get_first_child() const;
     UCTNode* get_nopass_child(FastState& state) const;
+    UCTNode* get_noeye_child(FastState& state) const; // (AHN)
+
     std::unique_ptr<UCTNode> find_child(const int move);
     void inflate_all_children();
 

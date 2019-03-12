@@ -423,7 +423,8 @@ int UCTSearch::get_best_move(passflag_t passflag) {
         m_root->randomize_first_proportionally();
     }
 
-    auto first_child = m_root->get_first_child();
+    // auto first_child = m_root->get_first_child();
+    auto first_child = m_root->get_noeye_child( m_rootstate); // AHN
     assert(first_child != nullptr);
 
     auto bestmove = first_child->get_move();

@@ -17,4 +17,5 @@ from dlgo.httpfrontend.server import get_web_app
 print( 'Point your browser at http://127.0.0.1:5000/static/score19.html')
 smart_random_agent = FastSmartRandomBot()
 web_app = get_web_app({'smartrandom':smart_random_agent})
-web_app.run()
+web_app.run( host='0.0.0.0')
+

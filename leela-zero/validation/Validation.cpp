@@ -20,11 +20,16 @@
 #include <QFile>
 #include <QDir>
 #include <QUuid>
+#include <unistd.h>
+
+// Number of games generated. // AHN.
+#define NUMGAMES 100
 
 using VersionTuple = std::tuple<int, int, int>;
 // Minimal Leela Zero version we expect to see
 const VersionTuple min_leelaz_version{0, 16, 0};
 
+static bool OVER = false; // AHN
 
 void ValidationWorker::run() {
     do {
@@ -94,12 +99,18 @@ void ValidationWorker::run() {
             } else {
                 emit resultReady(Sprt::Loss, m_expected);
             }
-            // Change color and play again
-            std::swap(m_engines[0], m_engines[1]);
-            if (m_expected == Game::BLACK) {
+            if (!OVER) {
+              // Change color and play again
+              std::swap(m_engines[0], m_engines[1]);
+              if (m_expected == Game::BLACK) {
                 m_expected = Game::WHITE;
-            } else {
+              } else {
                 m_expected = Game::BLACK;
+              }
+            }
+            else {
+              QTextStream(stdout) << "Game generation done." << endl;
+              quick_exit (EXIT_SUCCESS);
             }
         } else {
             first.gameQuit();
@@ -232,13 +243,16 @@ void Validation::getResult(Sprt::GameResult result, int net_one_color) {
     auto wdl = m_statistic.getWDL();
     QTextStream(stdout) << std::get<0>(wdl) << " wins, "
                         << std::get<2>(wdl) << " losses" << endl;
-    if (status.result != Sprt::Continue) {
+    //if (status.result != Sprt::Continue) {
+    auto ngames = std::get<0>(wdl) + std::get<2>(wdl); // AHN
+    if (ngames >= NUMGAMES) { // AHN
         quitThreads();
         QTextStream(stdout)
             << "The first net is "
             <<  ((status.result ==  Sprt::AcceptH0) ? "worse " : "better ")
             << "than the second" << endl;
         m_results.printResults(m_engines[0].m_network, m_engines[1].m_network);
+        OVER = true;
         //sendQuit();
     } else {
         printSprtStatus(status);

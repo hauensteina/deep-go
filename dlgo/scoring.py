@@ -12,12 +12,14 @@
 from __future__ import absolute_import
 from collections import namedtuple
 from dlgo.gotypes import Player, Point
+import numpy as np
 
 #===================
 class Territory:
 
-    #-------------------------------------------
-    def __init__(self, territory_map):  # <1>
+    #----------------------------------------
+    def __init__( self, territory_map):
+        self.n_intersections = len( territory_map)
         self.num_black_territory = 0
         self.num_white_territory = 0
         self.num_black_stones = 0
@@ -26,7 +28,7 @@ class Territory:
         self.dame_points = []
         self.black_points = []
         self.white_points = []
-        for point, status in territory_map.items():  # <2>
+        for point, status in territory_map.items():
             if status == Player.black:
                 self.num_black_stones += 1
                 self.black_points.append( point)
@@ -43,12 +45,23 @@ class Territory:
                 self.num_dame += 1
                 self.dame_points.append( point)
 
-# <1> A `territory_map` splits the board into stones, territory and neutral points (dame).
-# <2> Depending on the status of a point, we increment the respective counter.
-# end::scoring_territory[]
+    # Turn yourself into a 1D np array of -1,0,1 for b,e,w .
+    # This is the label we use to train a territory estimator.
+    #------------------------------------------------------------
+    def encode( self):
+        res = np.zeros( self.n_intersections)
+        size = int( np.sqrt( self.n_intersections))
+        for p in self.black_points:
+            idx = (p.row - 1) * size + p.col -1
+            res[idx] = -1
+        for p in self.white_points:
+            idx = (p.row - 1) * size + p.col -1
+            res[idx] = 1
+        return res
+
 
 #=========================================================
-class GameResult(namedtuple('GameResult', 'b w komi')):
+class GameResult( namedtuple( 'GameResult', 'b w komi')):
     @property
     def winner(self):
         if self.b > self.w + self.komi:
@@ -71,10 +84,10 @@ class GameResult(namedtuple('GameResult', 'b w komi')):
 # counted as territory; it makes no attempt to identify even
 # trivially dead groups.
 #-------------------------------
-def evaluate_territory(board):
+def evaluate_territory( board):
     status = {}
-    for r in range(1, board.num_rows + 1):
-        for c in range(1, board.num_cols + 1):
+    for r in range( 1, board.num_rows + 1):
+        for c in range( 1, board.num_cols + 1):
             p = Point(row=r, col=c)
             if p in status:  # <1>
                 continue

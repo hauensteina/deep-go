@@ -10,14 +10,14 @@
 #
 
 from pdb import set_trace as BP
-import os,sys
+import os,sys,re
 import argparse
 
-# Look for modules in our pylib folder
-SCRIPTPATH = os.path.dirname(os.path.realpath(__file__))
-sys.path.append( SCRIPTPATH + '/../pylib')
+# Look for modules further up
+SCRIPTPATH = os.path.dirname(os.path.realpath( __file__))
+sys.path.append( re.sub(r'/proj/.*',r'/', SCRIPTPATH))
 
-import ahnutil as ut
+import pylib.ahnutil as ut
 
 #---------------------------
 def usage(printmsg=False):

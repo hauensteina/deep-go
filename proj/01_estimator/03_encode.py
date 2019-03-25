@@ -11,10 +11,9 @@
 #
 
 from pdb import set_trace as BP
-import os
-import sys, glob, shutil, re
+import os, sys, re
+import argparse
 import numpy as np
-#from keras.utils import to_categorical
 
 # Look for modules further up
 SCRIPTPATH = os.path.dirname(os.path.realpath( __file__))
@@ -26,7 +25,8 @@ from dlgo.gotypes import Player, Point
 from dlgo.encoders.base import get_encoder_by_name
 from dlgo.utils import print_board, print_move
 from dlgo.scoring import compute_game_result
-#from dlgo.data.sampling import Sampler
+
+import pylib.ahnutil as ut
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-200, N-150, etc in a game of length N in a single
@@ -39,7 +39,7 @@ from dlgo.scoring import compute_game_result
 class ScoreDataGenerator:
 
     #------------------------------------------------------------------------
-    def __init__( self, encoder='score_encoder', data_directory='sgf_data'):
+    def __init__( self, encoder='score_encoder', data_directory='train'):
         self.board_sz = 19
         self.encoder = get_encoder_by_name( encoder, self.board_sz)
         self.data_dir = data_directory
@@ -67,19 +67,10 @@ class ScoreDataGenerator:
     #----------------------------------------------
     def encode_sgf_files( self, num_samples=10):
         rewinds = (200,150,100,50,0) # How far to rewind from game end
-        fnames = [x for x in os.listdir( self.data_dir) if x.endswith( '.sgf')]
-        #totsamples =  len(rewinds) * len(fnames)
+        fnames = ut.find( self.data_dir, '*.sgf')
 
-        # 'features' stores the encoded positions
         feat_shape = self.encoder.shape()
-        # feat_shape = np.insert( feat_shape, 0, totsamples)
-        # features = np.zeros( feat_shape)
-
-        # 'labels' stores the encoded scores
         lab_shape = ( self.board_sz * self.board_sz, )
-        # lab_shape = np.insert( lab_shape, 0, totsamples)
-        # labels = np.zeros( lab_shape)
-
         features = []
         labels = []
         # for each sgf_file
@@ -87,7 +78,7 @@ class ScoreDataGenerator:
         for f in fnames:
             print(f)
             # Get score and number of moves
-            sgfstr = open( self.data_dir + '/' + f).read()
+            sgfstr = open(f).read()
             nmoves, territory = self.score_sgf( sgfstr)
             label = territory.encode()
 
@@ -113,14 +104,42 @@ class ScoreDataGenerator:
                         nsamples += 1
 
         tt = np.concatenate( features)
-        np.save( 'features.npy', tt)
+        np.save( '%s_feat.npy' % self.data_dir, tt)
         tt = np.concatenate( labels)
-        np.save( 'labels.npy', tt)
+        np.save( '%s_lab.npy' % self.data_dir, tt)
+
+#---------------------------
+def usage(printmsg=False):
+    name = os.path.basename(__file__)
+    msg = '''
+    Name:
+      %s -- Encode sgf files below a folder into numpy arrays and save them
+    Synopsis:
+      %s --folder <folder>
+    Description:
+       Results go to <folder>_feat.npy and <folder>_lab.npy
+    Example:
+      %s --folder train
+      Output will be in train_feat.npy and train_lab.npy
+    ''' % (name,name,name)
+    if printmsg:
+        print(msg)
+        exit(1)
+    else:
+        return msg
 
 #-----------
 def main():
-    proc = ScoreDataGenerator()
+    if len(sys.argv) == 1:
+        usage(True)
+
+    parser = argparse.ArgumentParser( usage=usage())
+    parser.add_argument( "--folder", required=True)
+    args = parser.parse_args()
+
+    proc = ScoreDataGenerator( data_directory = args.folder)
     proc.encode_sgf_files()
+
 
 if __name__ == '__main__':
     main()

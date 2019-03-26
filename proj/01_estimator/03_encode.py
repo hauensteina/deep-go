@@ -99,13 +99,14 @@ class ScoreDataGenerator:
                     game_state = game_state.apply_move( move)
                     move_counter += 1
                     if move_counter in snaps:
-                        features.append( self.encoder.encode( game_state))
+                        encoded = self.encoder.encode( game_state)
+                        features.append( encoded)
                         labels.append( label)
                         nsamples += 1
 
-        tt = np.concatenate( features)
+        tt = np.array( features)
         np.save( '%s_feat.npy' % self.data_dir, tt)
-        tt = np.concatenate( labels)
+        tt = np.array( labels)
         np.save( '%s_lab.npy' % self.data_dir, tt)
 
 #---------------------------

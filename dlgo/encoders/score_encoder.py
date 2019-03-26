@@ -39,14 +39,14 @@ class ScoreEncoder(Encoder):
                 if go_string is None:
                     continue
                 if go_string.color == Player.black:
-                    board_matrix[0, r, c] = -1
+                    board_matrix[r, c, 0] = -1
                 else:
-                    board_matrix[0, r, c] = 1
+                    board_matrix[r, c, 0] = 1
         return board_matrix
 
     # Turn a board point into an integer index
     #--------------------------------------------
-    def encode_point( self, point): 
+    def encode_point( self, point):
         return self.board_width * (point.row - 1) + (point.col - 1)
 
     # Turn an integer index into a board point
@@ -62,10 +62,8 @@ class ScoreEncoder(Encoder):
 
     #-------------------
     def shape( self):
-        return self.num_planes, self.board_height, self.board_width
+        return self.board_height, self.board_width, self.num_planes
 
 #-------------------------
 def create( board_size):
     return ScoreEncoder( board_size)
-
-

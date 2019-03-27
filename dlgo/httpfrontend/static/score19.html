@@ -37,7 +37,7 @@
 
     <!-- Page HTML    -->
     <br>
-    <div style='font-size:20pt'>Bot playing Bot</div>
+    <div style='font-size:20pt'>Scoring Test</div>
     <div id='board'></div>
     <div>
       <div id='status'> &nbsp; </div>
@@ -71,6 +71,7 @@
       <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
       <a id='btn_pause' class='btn btn-default' style='font-size:20pt'>Pause</a>
       <a id='btn_score' class='btn btn-default' style='font-size:20pt'>Score</a>
+      <a id='btn_nnscore' class='btn btn-default' style='font-size:20pt'>NNScore</a>
     </div>
     <br>
     <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
@@ -212,15 +213,15 @@
        return new JGO.Coordinate( col - 1, BOARD_SIZE - row)
      } // rc2Jgo
 
-     // Score the current position
-     //------------------------------
-     function scorePosition()
+     // Score the current position. Endpoint is 'score' or 'nnscore'.
+     //----------------------------------------------------------------
+     function scorePosition( endpoint)
      {
        if (g_waiting_for_bot) {
          console.log( 'still waiting')
          return
        }
-       fetch( '/score', {
+       fetch( '/' + endpoint, {
          method: 'POST',
          headers: {
            'Content-Type': 'application/json',
@@ -334,8 +335,14 @@
        })
 
        $('#btn_score').click( () => {
-           console.log( 'score clicked')
-           scorePosition()
+         console.log( 'score clicked')
+         scorePosition( 'score')
+         return false
+       })
+
+       $('#btn_nnscore').click( () => {
+         console.log( 'nnscore clicked')
+         scorePosition( 'nnscore')
          return false
        })
 

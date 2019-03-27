@@ -13,6 +13,7 @@ from __future__ import absolute_import
 from collections import namedtuple
 from dlgo.gotypes import Player, Point
 import numpy as np
+from pdb import set_trace as BP
 
 #===================
 class Territory:
@@ -140,7 +141,7 @@ def _collect_region( start_pos, board, visited=None):
             all_borders.add( neighbor)
     return all_points, all_borders
 
-# Entry point.
+# Naive Tromp Taylor result
 #--------------------------------------
 def compute_game_result( game_state):
     territory = evaluate_territory( game_state.board)
@@ -148,5 +149,29 @@ def compute_game_result( game_state):
             GameResult(
                 territory.num_black_territory + territory.num_black_stones,
                 territory.num_white_territory + territory.num_white_stones,
+                komi=7.5)
+    )
+
+# Turn nn output into the expected scoring format
+#----------------------------------------------------
+def compute_nn_game_result( labels):
+    lim = 0.5 # Anything closer to zero is dame
+    labels = labels[0,:]
+    n_isecs = len(labels)
+    boardsize = int(round(np.sqrt(n_isecs)))
+    terrmap = {}
+    for r in range( 1, boardsize+1):
+        for c in range( 1, boardsize+1):
+            p = Point( row=r, col=c)
+            if labels[ (r-1)*boardsize + c - 1] < -lim:
+                terrmap[p] = 'territory_b'
+            elif labels[ (r-1)*boardsize + c - 1] > lim:
+                terrmap[p] = 'territory_w'
+            else: terrmap[p] = 'dame'
+    territory = Territory( terrmap)
+    return (territory,
+            GameResult(
+                territory.num_black_territory,
+                territory.num_white_territory,
                 komi=7.5)
     )

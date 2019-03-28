@@ -68,7 +68,7 @@ class ScoreDataGenerator:
         return nmoves, territory
 
     #----------------------------------------------
-    def encode_sgf_files( self, num_samples=10):
+    def encode_sgf_files( self):
         fnames = ut.find( self.data_dir, '*.sgf')
 
         feat_shape = self.encoder.shape()
@@ -102,8 +102,12 @@ class ScoreDataGenerator:
                     move_counter += 1
                     if move_counter in snaps:
                         encoded = self.encoder.encode( game_state)
-                        features.append( encoded)
-                        labels.append( label)
+                        # Get all eight symmetries
+                        featsyms = ut.syms( encoded)
+                        labsyms  = ut.syms( label)
+                        labsyms = [x.flatten() for x in labsyms]
+                        features.extend( featsyms)
+                        labels.extend( labsyms)
                         nsamples += 1
 
         tt = np.array( features)

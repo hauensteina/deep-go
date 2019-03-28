@@ -36,7 +36,7 @@ import pylib.ahnutil as ut
 import score_model as m
 
 num_cores = 8
-GPU=0
+GPU=1
 
 if GPU:
     pass

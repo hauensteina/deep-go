@@ -239,7 +239,6 @@ def find( folder, filterstr):
 #-------------------------------------------------
 def syms( nxn):
     res = []
-
     # Rotations
     tt = nxn.copy()
     res.append( tt)

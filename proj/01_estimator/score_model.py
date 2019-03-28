@@ -41,29 +41,23 @@ class Model:
         nplanes = 1
         inputs = kl.Input( shape = ( self.boardsz, self.boardsz, nplanes), name = 'position')
 
-        x = kl.Conv2D( 64, (3,3), activation='relu', padding='same', name='one_a')(inputs)
+        x = kl.Conv2D( 64, (5,5), activation='relu', padding='same', name='one_a')(inputs)
         x = kl.BatchNormalization(axis=-1)(x) # -1 for tf back end, 1 for theano
         x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='one_b')(x)
         x = kl.BatchNormalization(axis=-1)(x)
 
         x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_a')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 64, (1,1), activation='relu', padding='same', name='two_b')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
         x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c')(x)
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
-        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_a1')(x)
+        x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 64, (1,1), activation='relu', padding='same', name='two_b1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c1')(x)
+        x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_c1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
 
         x = kl.Conv2D( 512,(3,3), activation='relu', padding='same', name='three_a1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 256, (1,1), activation='relu', padding='same', name='three_b1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.Conv2D( 512 , (3,3), activation='relu', padding='same', name='three_c1')(x)
         x = kl.BatchNormalization(axis=-1)(x)

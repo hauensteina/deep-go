@@ -41,33 +41,38 @@ class Model:
         nplanes = 1
         inputs = kl.Input( shape = ( self.boardsz, self.boardsz, nplanes), name = 'position')
 
-        x = kl.Conv2D( 4, (3,3), activation='relu', padding='same', name='one_a')(inputs)
+        x = kl.Conv2D( 64, (3,3), activation='relu', padding='same', name='one_a')(inputs)
         x = kl.BatchNormalization(axis=-1)(x) # -1 for tf back end, 1 for theano
-        x = kl.MaxPooling2D()(x)
-        x = kl.Conv2D( 8, (3,3), activation='relu', padding='same', name='one_b')(x)
+        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='one_b')(x)
+        x = kl.BatchNormalization(axis=-1)(x)
+
+        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_a')(x)
+        x = kl.BatchNormalization(axis=-1)(x)
+        x = kl.Conv2D( 64, (1,1), activation='relu', padding='same', name='two_b')(x)
+        x = kl.BatchNormalization(axis=-1)(x)
+        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c')(x)
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
-        x = kl.Conv2D( 16, (3,3), activation='relu', padding='same', name='two_a')(x)
+        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 8, (1,1), activation='relu', padding='same', name='two_b')(x)
+        x = kl.Conv2D( 64, (1,1), activation='relu', padding='same', name='two_b1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 16, (3,3), activation='relu', padding='same', name='two_c')(x)
+        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.MaxPooling2D()(x)
 
-        x = kl.Conv2D( 32,(3,3), activation='relu', padding='same', name='three_a1')(x)
+        x = kl.Conv2D( 512,(3,3), activation='relu', padding='same', name='three_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 16, (1,1), activation='relu', padding='same', name='three_b1')(x)
+        x = kl.Conv2D( 256, (1,1), activation='relu', padding='same', name='three_b1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 32, (3,3), activation='relu', padding='same', name='three_c1')(x)
+        x = kl.Conv2D( 512 , (3,3), activation='relu', padding='same', name='three_c1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
         # Classification block
         x_class_conv = kl.Conv2D( 361, (1,1), padding='same', name='lastconv')(x)
         x_class_pool = kl.GlobalAveragePooling2D()( x_class_conv)
-        # tanh, not softmax because each intersection needs a label
+        # sigmoid, not softmax because each intersection needs a label
         output = kl.Activation( 'sigmoid', name='class')(x_class_pool)
 
         self.model = km.Model( inputs=inputs, outputs=output)

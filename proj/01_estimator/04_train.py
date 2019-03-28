@@ -51,7 +51,7 @@ else:
 
 
 BOARD_SZ = 19
-BATCH_SIZE=100
+BATCH_SIZE = 400
 
 #---------------------------
 def usage(printmsg=False):

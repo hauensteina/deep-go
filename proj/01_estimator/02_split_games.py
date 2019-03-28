@@ -26,12 +26,13 @@ def usage(printmsg=False):
     Name:
       %s --  Divide sgf files in a folder into train, valid, test sets
     Synopsis:
-      %s --folder <folder> --trainpct <n> --validpct <n>
+      %s --folder <folder> --trainpct <n> --validpct <n> [--ngames <n>]
     Description:
       Splits the sgf files in folder into train, valid, and test files.
-      Only use files containing <substring> in the name.
+      The --ngames option limits the total number of total games going to
+      the train, valid, test folders.
     Example:
-      %s --folder sgf --trainpct 80 --validpct 10
+      %s --folder sgf --trainpct 80 --validpct 20 --ngames 100
       The remaining 10pct will be test data
     ''' % (name,name,name)
     if printmsg:
@@ -47,11 +48,12 @@ def main():
 
     parser = argparse.ArgumentParser(usage=usage())
     parser.add_argument( "--folder",      required=True)
-    parser.add_argument( "--trainpct",    required=True, type=int)
-    parser.add_argument( "--validpct",    required=True, type=int)
+    parser.add_argument( "--trainpct",    required=True,  type=int)
+    parser.add_argument( "--validpct",    required=True,  type=int)
+    parser.add_argument( "--ngames",      required=False, type=int)
     args = parser.parse_args()
     #np.random.seed(0) # Make things reproducible
-    ut.split_files( args.folder, args.trainpct, args.validpct)
+    ut.split_files( args.folder, args.trainpct, args.validpct, nfiles=args.ngames)
 
 if __name__ == '__main__':
     main()

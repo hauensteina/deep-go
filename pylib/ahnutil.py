@@ -196,12 +196,13 @@ def dump_n_best_and_worst( n, model, images, meta, sset='valid'):
 
 # Randomly split the sgf files in a folder into
 # train, valid, test
-#-------------------------------------------------
-def split_files( folder, trainpct, validpct, substr=''):
+#------------------------------------------------------------------
+def split_files( folder, trainpct, validpct, substr='', nfiles=0):
     files = glob.glob( folder + '/*.sgf')
     files = [os.path.basename(f) for f in files];
     files = [f for f in files if substr in f];
     random.shuffle( files)
+    if nfiles: files = files[:nfiles]
     ntrain = int( round( len( files) * (trainpct / 100.0)))
     nvalid = int( round( len( files) * (validpct / 100.0)))
     trainfiles = files[:ntrain]

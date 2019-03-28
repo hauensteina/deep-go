@@ -46,21 +46,21 @@ class Model:
         x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='one_b')(x)
         x = kl.BatchNormalization(axis=-1)(x)
 
-        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_a')(x)
+        x = kl.Conv2D( 256, (3,3), activation='relu', padding='same', name='two_a')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
+        # x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='two_c')(x)
+        # x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
         x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_c1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
+        # x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_c1')(x)
+        # x = kl.BatchNormalization(axis=-1)(x)
 
-        x = kl.Conv2D( 512,(3,3), activation='relu', padding='same', name='three_a1')(x)
+        x = kl.Conv2D( 1024,(3,3), activation='relu', padding='same', name='three_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.Conv2D( 512 , (3,3), activation='relu', padding='same', name='three_c1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
+        # x = kl.Conv2D( 512 , (3,3), activation='relu', padding='same', name='three_c1')(x)
+        # x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
         # Classification block

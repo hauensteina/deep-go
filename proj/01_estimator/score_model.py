@@ -68,7 +68,7 @@ class Model:
         x_class_conv = kl.Conv2D( 361, (1,1), padding='same', name='lastconv')(x)
         x_class_pool = kl.GlobalAveragePooling2D()( x_class_conv)
         # tanh, not softmax because each intersection needs a label
-        output = kl.Activation( 'tanh', name='class')(x_class_pool)
+        output = kl.Activation( 'sigmoid', name='class')(x_class_pool)
 
         self.model = km.Model( inputs=inputs, outputs=output)
         self.model.summary()
@@ -76,5 +76,5 @@ class Model:
             opt = kopt.Adam( self.rate)
         else:
             opt = kopt.Adam()
-        self.model.compile( loss='hinge', optimizer=opt, metrics=['accuracy'])
+        self.model.compile( loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
 #===================================================================================================

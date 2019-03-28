@@ -16,7 +16,7 @@ import argparse
 import numpy as np
 
 # Look for modules further up
-SCRIPTPATH = os.path.dirname(os.path.realpath( __file__))
+SCRIPTPATH = os.path.dirname( os.path.realpath( __file__))
 sys.path.append( re.sub(r'/proj/.*',r'/', SCRIPTPATH))
 
 from dlgo.gosgf import Sgf_game
@@ -27,6 +27,9 @@ from dlgo.utils import print_board, print_move
 from dlgo.scoring import compute_game_result
 
 import pylib.ahnutil as ut
+
+#REWINDS = (200,150,100,50,0) # How far to rewind from game end
+REWINDS = (50,) # How far to rewind from game end
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-200, N-150, etc in a game of length N in a single
@@ -66,7 +69,6 @@ class ScoreDataGenerator:
 
     #----------------------------------------------
     def encode_sgf_files( self, num_samples=10):
-        rewinds = (200,150,100,50,0) # How far to rewind from game end
         fnames = ut.find( self.data_dir, '*.sgf')
 
         feat_shape = self.encoder.shape()
@@ -80,10 +82,10 @@ class ScoreDataGenerator:
             # Get score and number of moves
             sgfstr = open(f).read()
             nmoves, territory = self.score_sgf( sgfstr)
-            label = territory.encode()
+            label = territory.encode_sigmoid()
 
             sgf = Sgf_game.from_string( sgfstr)
-            snaps = [nmoves - x for x in rewinds]
+            snaps = [nmoves - x for x in REWINDS]
             game_state = GameState.new_game( self.board_sz)
             move_counter = 0
             for item in sgf.main_sequence_iter():
@@ -110,7 +112,7 @@ class ScoreDataGenerator:
         np.save( '%s_lab.npy' % self.data_dir, tt)
 
 #---------------------------
-def usage(printmsg=False):
+def usage( printmsg=False):
     name = os.path.basename(__file__)
     msg = '''
     Name:

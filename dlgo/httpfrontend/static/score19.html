@@ -44,7 +44,6 @@
     </div>
     <br>
     <!-- Input form for sgf file upload -->
-    <!-- @@@ Write the js and python side of this -->
     <div>
     <form id="upload-file" method="post" enctype="multipart/form-data">
       <table class='center'>
@@ -67,7 +66,7 @@
     </div>
     <br>
     <div>
-      <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
+      <a id='btn_move' class='btn btn-default' style='font-size:20pt'>Move</a>
       <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
       <a id='btn_pause' class='btn btn-default' style='font-size:20pt'>Pause</a>
       <a id='btn_score' class='btn btn-default' style='font-size:20pt'>Score</a>
@@ -75,6 +74,13 @@
     </div>
     <br>
     <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
+    <br>
+    <div>
+      <a id='btn_first' class='btn btn-default' style='font-size:20pt'>First</a>
+      <a id='btn_prev' class='btn btn-default' style='font-size:20pt'>Prev</a>
+      <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
+      <a id='btn_last' class='btn btn-default' style='font-size:20pt'>Last</a>
+    </div>
 
     <!-- Our own JS -->
     <script type='text/javascript'>
@@ -91,6 +97,8 @@
      var g_ko = null // ko coordinate
      var g_lastMove = null // last move coordinate
      var g_record = null
+     var g_complete_record = null
+     var g_record_pos = 0
      var g_timer = null
      var g_waiting_for_bot = null
      var g_last_x = -1
@@ -104,6 +112,7 @@
        g_ko = false
        g_lastMove = false
        g_record = []
+       g_record_pos = 0
        g_timer = null
        g_waiting_for_bot = false
 
@@ -129,6 +138,12 @@
        return new JGO.Coordinate(col, row)
      } // stringToCoords()
 
+     //----------------------------------
+     function addMove( movestr) {
+       g_record.push( movestr)
+       g_record_pos = g_record.length
+     }
+
      //-----------------------------------
      function applyMove(player, coord) {
        //console.log( player)
@@ -136,7 +151,7 @@
        var play = g_jrecord.jboard.playMove( coord, player, g_ko)
 
        if (play.success) {
-         g_record.push( coordsToString( coord))
+         addMove( coordsToString( coord))
          var node = g_jrecord.createNode( true)
          node.info.captures[player] += play.captures.length // tally captures
          node.setType( coord, player) // play stone
@@ -188,7 +203,7 @@
                  $('#status').html( '&nbsp;')
                }
                if (data.bot_move == 'pass' || data.bot_move == 'resign') {
-                 g_record.push( data.bot_move)
+                 addMove( data.bot_move)
                  g_ko = false
                }
                else {
@@ -196,6 +211,8 @@
                  applyMove( g_player, botCoord)
                }
                g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+               g_complete_record = g_record.slice()
+               g_record_pos = g_complete_record.length
                g_waiting_for_bot = false
              } // func(data)
            )
@@ -303,7 +320,7 @@
        for (move_string of mlist) {
          if (move_string == 'pass' || move_string == 'resign') {
            g_ko = false
-           g_record.push( move_string)
+           addMove( move_string)
          }
          else {
            coord = stringToCoords( move_string)
@@ -313,12 +330,24 @@
        } // for
      } // replayMoveList()
 
+     // Replay and show game up to move n
+     //-------------------------------------
+     function gotoMove( n) {
+       var totmoves = g_complete_record.length
+       if (n > totmoves) { n = totmoves }
+       if (n < 1) { n = 1 }
+       var record = g_complete_record.slice( 0, n)
+       replayMoveList( record)
+       $('#status').html( `${n} / ${totmoves}`)
+       g_record_pos = n
+     } // gotoMove()
+
      // Set button callbacks
      //------------------------------
      function set_btn_handlers() {
        $('#btn_new').click( newGame)
 
-       $('#btn_next').click( () => {
+       $('#btn_move').click( () => {
            console.log( 'next clicked')
            $('#status').html( 'thinking...')
            getBotMove()
@@ -358,9 +387,20 @@
            success: (response) => {
              var moves = response.result
              replayMoveList( moves)
+             g_complete_record = g_record.slice()
+             g_record_pos = g_complete_record.length
            },
          })
        })
+
+       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1) })
+
+       $('#btn_next').click( () => { gotoMove( g_record_pos + 1) })
+
+       $('#btn_first').click( () => { gotoMove( 1) })
+
+       $('#btn_last').click( () => { gotoMove( g_complete_record.length) })
+
      } // set_btn_handlers()
 
      // Load an sgf game

@@ -29,7 +29,7 @@ from dlgo.scoring import compute_game_result
 import pylib.ahnutil as ut
 
 #REWINDS = (200,150,100,50,0) # How far to rewind from game end
-REWINDS = (50,) # How far to rewind from game end
+REWINDS = (50, 100, 150) # How far to rewind from game end
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-200, N-150, etc in a game of length N in a single

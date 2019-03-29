@@ -154,7 +154,7 @@ def compute_game_result( game_state):
 # Turn nn output into the expected scoring format
 #----------------------------------------------------
 def compute_nn_game_result( labels):
-    lim = 0.5 # Anything closer to zero is dame
+    lim = 0.5 # Between B and W
     labels = labels[0,:]
     n_isecs = len(labels)
     boardsize = int(round(np.sqrt(n_isecs)))
@@ -162,7 +162,7 @@ def compute_nn_game_result( labels):
     for r in range( 1, boardsize+1):
         for c in range( 1, boardsize+1):
             p = Point( row=r, col=c)
-            if labels[ (r-1)*boardsize + c - 1] < -lim:
+            if labels[ (r-1)*boardsize + c - 1] <= lim:
                 terrmap[p] = 'territory_b'
             elif labels[ (r-1)*boardsize + c - 1] > lim:
                 terrmap[p] = 'territory_w'

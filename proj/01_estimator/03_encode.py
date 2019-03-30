@@ -32,13 +32,13 @@ import pylib.ahnutil as ut
 REWINDS = (50, 100, 150) # How far to rewind from game end
 
 # Generate encoded positions and labels to train a score estimator.
-# Encode snapshots at N-200, N-150, etc in a game of length N in a single
+# Encode snapshots at N-150, N-100, etc in a game of length N in a single
 # plane representation. The game must have been played out until no dead stones
-# are left. The label is a 361 long vector of -1,0,1 indicating whether an
+# are left. The label is a 361 long vector of 0, 0.5, 1 indicating whether an
 # intersection ends up being black, neutral, or white. Each snapshot for a game
 # gets the label from the final position.
-# Stuff all (plane,label) pairs into a huge numpy array and save to file.
-#==========================
+# Stuff postions and labels into two huge numpy arrays and save them to file.
+#==================================================================================
 class ScoreDataGenerator:
 
     #------------------------------------------------------------------------

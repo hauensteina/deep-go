@@ -21,6 +21,7 @@ import keras.optimizers as kopt
 import keras.preprocessing.image as kp
 import tensorflow as tf
 from keras import backend as K
+from keras.callbacks import ModelCheckpoint
 
 #import coremltools
 
@@ -94,10 +95,17 @@ def main():
     valid_feat = np.load( 'valid_feat.npy')
     valid_lab  = np.load( 'valid_lab.npy')
 
+    # checkpoint
+    filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.h5"
+    checkpoint = ModelCheckpoint( filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    callbacks_list = [checkpoint]
+
     # Train
     model.model.fit( train_feat, train_lab,
                      batch_size=BATCH_SIZE, epochs=args.epochs,
-                    validation_data = (valid_feat, valid_lab))
+                     validation_data = (valid_feat, valid_lab),
+                     callbacks=callbacks_list)
+
     # ut.dump_n_best_and_worst( 10, model.model, images, meta, 'train')
     # ut.dump_n_best_and_worst( 10, model.model, images, meta, 'valid')
 

@@ -77,8 +77,10 @@
     <br>
     <div>
       <a id='btn_first' class='btn btn-default' style='font-size:20pt'>First</a>
+      <a id='btn_back10' class='btn btn-default' style='font-size:20pt'>Back 10</a>
       <a id='btn_prev' class='btn btn-default' style='font-size:20pt'>Prev</a>
       <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
+      <a id='btn_fwd10' class='btn btn-default' style='font-size:20pt'>Fwd 10</a>
       <a id='btn_last' class='btn btn-default' style='font-size:20pt'>Last</a>
     </div>
 
@@ -394,11 +396,10 @@
        })
 
        $('#btn_prev').click( () => { gotoMove( g_record_pos - 1) })
-
        $('#btn_next').click( () => { gotoMove( g_record_pos + 1) })
-
+       $('#btn_back10').click( () => { gotoMove( g_record_pos - 10) })
+       $('#btn_fwd10').click( () => { gotoMove( g_record_pos + 10) })
        $('#btn_first').click( () => { gotoMove( 1) })
-
        $('#btn_last').click( () => { gotoMove( g_complete_record.length) })
 
      } // set_btn_handlers()

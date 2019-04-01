@@ -51,8 +51,8 @@ def main():
     for i in range( ncalls):
         print( 'Generating games %d to %d ...' % (i * GAMES_PER_CALL, (i+1) * GAMES_PER_CALL))
         CMD = ("cd %s/leela-zero/build; validation/validation -g 1 -k %s "
-               "-n elfv1 -o '-g -p 1 --noponder -t 1 -d -r 0 -w' " +
-               "-n elfv1 -o '-g -p 1 --noponder -t 1 -d -r 0 -w' ") % (ROOT, args.outfolder)
+               "-n elfv1 -o '-g -m 50 -p 1 --noponder -t 1 -d -r 0 -w' " +
+               "-n elfv1 -o '-g -m 50 -p 1 --noponder -t 1 -d -r 0 -w' ") % (ROOT, args.outfolder)
         subprocess.check_output( CMD, shell=True)
         subprocess.check_output( 'mv %s/leela-zero/build/%s/* %s' % (ROOT, args.outfolder, args.outfolder), shell=True)
 

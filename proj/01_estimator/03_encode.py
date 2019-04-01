@@ -29,7 +29,11 @@ from dlgo.scoring import compute_game_result
 import pylib.ahnutil as ut
 
 #REWINDS = (200,150,100,50,0) # How far to rewind from game end
-REWINDS = (50, 100, 150) # How far to rewind from game end
+REWINDS = (50, 75, 100, 125)
+#REWINDS = (125, 150, 175, 200)
+#REWINDS = (150, 175, 200, 225)
+
+ENCODER = 'score_encoder'
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-150, N-100, etc in a game of length N in a single
@@ -42,7 +46,7 @@ REWINDS = (50, 100, 150) # How far to rewind from game end
 class ScoreDataGenerator:
 
     #------------------------------------------------------------------------
-    def __init__( self, encoder='score_encoder', data_directory='train'):
+    def __init__( self, encoder=ENCODER, data_directory='train'):
         self.board_sz = 19
         self.encoder = get_encoder_by_name( encoder, self.board_sz)
         self.data_dir = data_directory
@@ -77,8 +81,9 @@ class ScoreDataGenerator:
         labels = []
         # for each sgf_file
         nsamples = 0
-        for f in fnames:
-            print(f)
+        for idx,f in enumerate(fnames):
+            if idx % 100 == 0:
+                print( '%d / %d' % (idx+1, len(fnames)))
             # Get score and number of moves
             sgfstr = open(f).read()
             nmoves, territory = self.score_sgf( sgfstr)
@@ -102,6 +107,7 @@ class ScoreDataGenerator:
                     move_counter += 1
                     if move_counter in snaps:
                         encoded = self.encoder.encode( game_state)
+                        #label = self.label_bdead( encoded, label)
                         # Get all eight symmetries
                         featsyms = ut.syms( encoded)
                         labsyms  = ut.syms( label)
@@ -114,6 +120,18 @@ class ScoreDataGenerator:
         np.save( '%s_feat.npy' % self.data_dir, tt)
         tt = np.array( labels)
         np.save( '%s_lab.npy' % self.data_dir, tt)
+
+    # Any b stone in encoded that isn't in label is dead.
+    # Black dead = 1, all else is 0.
+    #---------------------------------------------------------
+    def label_bdead( self, encoded, label):
+        res = np.full( (self.board_sz, self.board_sz), 0, dtype='int8')
+        for r in range( 0, self.board_sz):
+            for c in range( 0, self.board_sz):
+                if encoded[r,c,0] != -1: continue
+                if label[r,c] != 0:
+                    res[r,c] = 1.0
+        return res
 
 #---------------------------
 def usage( printmsg=False):

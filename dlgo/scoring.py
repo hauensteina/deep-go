@@ -46,19 +46,17 @@ class Territory:
                 self.num_dame += 1
                 self.dame_points.append( point)
 
-    # Turn yourself into a 1D np array of 0, 0.5, 1 for b,e,w .
+    # Turn yourself into a 1D np array of 0 for b territory or stone, else 1.
+    # So 1 denotes w territory or dame.
     # This is the label we use to train a territory estimator using
     # sigmoid activation.
     #------------------------------------------------------------
     def encode_sigmoid( self):
         bsz = int( round( np.sqrt( self.n_intersections)))
-        res = np.full( (bsz, bsz), 0.5)
+        res = np.full( (bsz, bsz), 1, dtype='int8')
         for p in self.black_points:
             res[p.row - 1, p.col - 1] = 0
-        for p in self.white_points:
-            res[p.row - 1, p.col - 1] = 1
         return res
-
 
 #=========================================================
 class GameResult( namedtuple( 'GameResult', 'b w komi')):

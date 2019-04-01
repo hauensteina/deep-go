@@ -31,7 +31,7 @@ class ScoreEncoder(Encoder):
 
     #------------------------------
     def encode( self, game_state):
-        board_matrix = np.zeros( self.shape())
+        board_matrix = np.full( self.shape(), 0, dtype='int8')
         for r in range( self.board_height):
             for c in range( self.board_width):
                 p = Point( row = r + 1, col = c + 1)

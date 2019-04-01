@@ -96,8 +96,8 @@ def main():
     valid_lab  = np.load( 'valid_lab.npy')
 
     # checkpoint
-    filepath="weights-improvement-{epoch:02d}-{val_acc:.2f}.h5"
-    checkpoint = ModelCheckpoint( filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+    filepath="model-improvement-{epoch:02d}-{val_acc:.2f}.hd5"
+    checkpoint = ModelCheckpoint( filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=False, mode='max')
     callbacks_list = [checkpoint]
 
     # Train

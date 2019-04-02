@@ -34,6 +34,7 @@ REWINDS = (50, 75, 100, 125)
 #REWINDS = (150, 175, 200, 225)
 
 ENCODER = 'score_encoder'
+CHUNKSIZE = 1024
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-150, N-100, etc in a game of length N in a single
@@ -71,19 +72,35 @@ class ScoreDataGenerator:
         territory, _ = compute_game_result( game_state)
         return nmoves, territory
 
+    # Save a chunk of features and labels and remove the chunk from input
+    #----------------------------------------------------------------------
+    def save_chunk( self, chunknum, features, labels):
+        chunkdir = '%s/chunks' % self.data_dir
+        if not os.path.exists( chunkdir):
+            os.makedirs( chunkdir)
+        featfname = chunkdir + '/feat_%0.7d.npy' % chunknum
+        labfname  = chunkdir + '/lab_%0.7d.npy' % chunknum
+        np.save( featfname, np.array( features[:CHUNKSIZE]))
+        np.save( labfname, np.array( labels[:CHUNKSIZE]))
+        features[:] = features[CHUNKSIZE:]
+        labels[:] = labels[CHUNKSIZE:]
+
     #----------------------------------------------
     def encode_sgf_files( self):
         fnames = ut.find( self.data_dir, '*.sgf')
-
         feat_shape = self.encoder.shape()
         lab_shape = ( self.board_sz * self.board_sz, )
         features = []
         labels = []
         # for each sgf_file
-        nsamples = 0
+        chunknum = 0
         for idx,f in enumerate(fnames):
+            if len(features) > CHUNKSIZE:
+                self.save_chunk( chunknum, features, labels)
+                chunknum += 1
+
             if idx % 100 == 0:
-                print( '%d / %d' % (idx+1, len(fnames)))
+                print( '%d / %d' % (idx, len(fnames)))
             # Get score and number of moves
             sgfstr = open(f).read()
             nmoves, territory = self.score_sgf( sgfstr)
@@ -114,12 +131,6 @@ class ScoreDataGenerator:
                         labsyms = [x.flatten() for x in labsyms]
                         features.extend( featsyms)
                         labels.extend( labsyms)
-                        nsamples += 1
-
-        tt = np.array( features)
-        np.save( '%s_feat.npy' % self.data_dir, tt)
-        tt = np.array( labels)
-        np.save( '%s_lab.npy' % self.data_dir, tt)
 
     # Any b stone in encoded that isn't in label is dead.
     # Black dead = 1, all else is 0.

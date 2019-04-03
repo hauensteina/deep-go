@@ -34,7 +34,7 @@ REWINDS = (50, 75, 100, 125)
 #REWINDS = (150, 175, 200, 225)
 
 ENCODER = 'score_encoder'
-CHUNKSIZE = 1024
+CHUNKSIZE = 1000
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-150, N-100, etc in a game of length N in a single

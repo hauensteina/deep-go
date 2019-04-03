@@ -11,7 +11,7 @@
 
 from pdb import set_trace as BP
 import inspect
-import os,sys,re,json, shutil
+import os,sys,re,json, shutil, glob
 import numpy as np
 from numpy.random import random
 import argparse
@@ -52,7 +52,7 @@ else:
 
 
 BOARD_SZ = 19
-BATCH_SIZE = 400
+BATCH_SIZE = 100
 
 #---------------------------
 def usage(printmsg=False):
@@ -73,6 +73,28 @@ def usage(printmsg=False):
     else:
         return msg
 
+#====================
+class Generator:
+    #--------------------------------------
+    def __init__( self, data_directory):
+        self.datadir = data_directory + '/chunks'
+        self.fnames = glob.glob( self.datadir + '/feat_*.npy')
+
+    #--------------------------------------
+    def generate( self, batch_size=100):
+        while(1):
+            featname = np.random.choice( self.fnames)
+            #print( '\ngetting batches from %s' % featname)
+            labname  = featname.replace( 'feat_', 'lab_')
+            feats = np.load( featname)
+            labs = np.load( labname)
+            if feats.shape[0] % batch_size:
+                print( 'Warning: chunk size %d not a multiple of batch size %d' % (feats.shape[0],  batch_size))
+            while feats.shape[0] >= batch_size:
+                feat_batch, feats = feats[:batch_size], feats[batch_size:]
+                lab_batch, labs = labs[:batch_size], labs[batch_size:]
+                yield feat_batch, lab_batch
+
 #-----------
 def main():
     if len(sys.argv) == 1:
@@ -89,22 +111,18 @@ def main():
     if os.path.exists( wfname):
         model.model.load_weights( wfname)
 
-    # Load encoded data
-    train_feat = np.load( 'train_feat.npy')
-    train_lab  = np.load( 'train_lab.npy')
-    valid_feat = np.load( 'valid_feat.npy')
-    valid_lab  = np.load( 'valid_lab.npy')
-
     # checkpoint
     filepath="model-improvement-{epoch:02d}-{val_acc:.2f}.hd5"
     checkpoint = ModelCheckpoint( filepath, monitor='val_acc', verbose=1, save_best_only=True, save_weights_only=False, mode='max')
     callbacks_list = [checkpoint]
 
-    # Train
-    model.model.fit( train_feat, train_lab,
-                     batch_size=BATCH_SIZE, epochs=args.epochs,
-                     validation_data = (valid_feat, valid_lab),
-                     callbacks=callbacks_list)
+    STEPS_PER_EPOCH = 100
+    model.model.fit_generator( Generator( 'train').generate( BATCH_SIZE),
+                               steps_per_epoch=STEPS_PER_EPOCH, epochs=args.epochs,
+                               validation_data = Generator( 'valid').generate( BATCH_SIZE),
+                               validation_steps=int(STEPS_PER_EPOCH/10),
+                               callbacks=callbacks_list)
+    #   , validation_freq=1, class_weight=None, max_queue_size=10, workers=1, use_multiprocessing=False, shuffle=True, initial_epoch=0)
 
     # ut.dump_n_best_and_worst( 10, model.model, images, meta, 'train')
     # ut.dump_n_best_and_worst( 10, model.model, images, meta, 'valid')

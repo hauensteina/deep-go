@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 # /********************************************************************
-# Filename: score_model.py
+# Filename: ttmodel.py
 # Author: AHN
-# Creation Date: Mar 2019
+# Creation Date: Apr 2019
 # **********************************************************************/
 #
-# Model definition to estimate territory given a Go position
+# Alphago-like model to estimate territory
 #
 
 from pdb import set_trace as BP
@@ -22,12 +22,6 @@ import keras.preprocessing.image as kp
 import tensorflow as tf
 from keras import backend as K
 
-# # Look for modules further up
-# SCRIPTPATH = os.path.dirname(os.path.realpath( __file__))
-# sys.path.append( re.sub(r'/proj/.*',r'/', SCRIPTPATH))
-
-# import pylib.ahnutil as ut
-
 #===================================================================================================
 class Model:
     #-------------------------------------------
@@ -39,29 +33,22 @@ class Model:
     #-----------------------
     def build_model(self):
         nplanes = 1
+        nfilters = 192
         inputs = kl.Input( shape = ( self.boardsz, self.boardsz, nplanes), name = 'position')
 
-        x = kl.Conv2D( 64, (5,5), activation='relu', padding='same', name='one_a')(inputs)
-        x = kl.BatchNormalization(axis=-1)(x) # -1 for tf back end, 1 for theano
-        x = kl.Conv2D( 128, (3,3), activation='relu', padding='same', name='one_b')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
+        x = kl.BatchNormalization(axis=-1)(inputs)
+        x = kl.Conv2D( nfilters, (5,5), activation='relu', padding='same', name='one')(x)
 
-        x = kl.Conv2D( 256, (3,3), activation='relu', padding='same', name='two_a')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.MaxPooling2D()(x)
-
-        x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_a1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-
-        x = kl.Conv2D( 1024,(3,3), activation='relu', padding='same', name='three_a1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-        x = kl.MaxPooling2D()(x)
+        for i in range(10):
+            x = kl.BatchNormalization(axis=-1)(x)
+            x = kl.Conv2D( nfilters, (3,3), activation='relu', padding='same', name='x_%03d' % i)(x)
 
         # Classification block
-        x_class_conv = kl.Conv2D( 361, (1,1), padding='same', name='lastconv')(x)
-        x_class_pool = kl.GlobalAveragePooling2D()( x_class_conv)
+        x = kl.BatchNormalization(axis=-1)(x)
+        x_class_conv = kl.Conv2D( 1, (1,1), padding='same', name='lastconv')(x)
+        toplayer = kl.Flatten()( x_class_conv)
         # sigmoid, not softmax because each intersection needs a label
-        output = kl.Activation( 'sigmoid', name='class')(x_class_pool)
+        output = kl.Activation( 'sigmoid', name='class')(toplayer)
 
         self.model = km.Model( inputs=inputs, outputs=output)
         self.model.summary()

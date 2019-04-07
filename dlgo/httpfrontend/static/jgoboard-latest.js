@@ -2064,13 +2064,17 @@ Stones.prototype.drawStone = function(ctx, type, ox, oy, scale) {
   var stone = (type == C.BLACK || type == C.DIM_BLACK) ? this.images.black : this.images.white;
 
   if(!stone) { // BW
-    ctx.fillStyle = (type == C.WHITE) ? '#FFFFFF' : '#000000';
+    ctx.fillStyle = (type == C.WHITE) ? '#DDDDCC' : '#000000';
     ctx.beginPath();
     ctx.arc(ox, oy, this.stoneR*scale, 2*Math.PI, false);
     ctx.fill();
 
     if(type == C.WHITE) {
       ctx.strokeStyle = '#000000';
+      ctx.stroke();
+    }
+    if(type == C.BLACK) {
+      ctx.strokeStyle = '#AAAAAA';
       ctx.stroke();
     }
   } else {
@@ -2129,12 +2133,12 @@ Stones.prototype.drawMark = function(ctx, mark, ox, oy) {
 
     case C.MARK.BLACK_TERRITORY:
       ctx.globalAlpha=1;
-      this.drawStone(ctx, C.BLACK, ox, oy, 0.5);
+      this.drawStone(ctx, C.BLACK, ox, oy, 0.4);
       break;
 
     case C.MARK.WHITE_TERRITORY:
       ctx.globalAlpha=1;
-      this.drawStone(ctx, C.WHITE, ox, oy, 0.5);
+      this.drawStone(ctx, C.WHITE, ox, oy, 0.4);
       break;
 
     case C.MARK.SELECTED:

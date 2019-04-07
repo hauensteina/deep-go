@@ -408,9 +408,9 @@
          }
        } // set_red()
 
-       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); g_cur_btn = 'prev'; set_red( '#btn_prev') })
-       $('#btn_next').click( () => { gotoMove( g_record_pos + 1); g_cur_btn = 'next'; set_red( '#btn_next') })
-       $('#btn_null').click( () => { gotoMove( g_record_pos + 1); g_cur_btn = ''; set_red('') })
+       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); g_cur_btn = '#btn_prev'; set_red( '#btn_prev') })
+       $('#btn_next').click( () => { gotoMove( g_record_pos + 1); g_cur_btn = '#btn_next'; set_red( '#btn_next') })
+       $('#btn_null').click( () => { g_cur_btn = ''; set_red('') })
        $('#btn_back10').click( () => { gotoMove( g_record_pos - 10) })
        $('#btn_fwd10').click( () => { gotoMove( g_record_pos + 10) })
        $('#btn_first').click( () => { gotoMove( 1) })
@@ -456,6 +456,12 @@
            //----------------------------
            canvas.addListener('click',
              function(coord, ev) {
+               // Repeat recent button action
+               if (g_cur_btn) {
+                 $(g_cur_btn).click()
+                 return
+               }
+               // No recent button =>  we edit the board.
                if (g_waiting_for_bot) {
                  return
                }
@@ -501,7 +507,7 @@
                g_last_hover = false;
              }
            ) // mouseout
-         }
+         } // function(canvas)
        )// create board
      } // main()
 

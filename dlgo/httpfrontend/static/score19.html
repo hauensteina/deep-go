@@ -50,14 +50,14 @@
         <tr>
           <td>
             <fieldset>
-              <input name="file" type="file">
+              <input name="file" type="file" style='font-size:20pt'>
             </fieldset>
           </td>
         </tr>
         <tr>
           <td>
             <fieldset>
-              <button id="upload-file-btn" type="button">Upload</button>
+              <button id="upload-file-btn" type="button" style='font-size:20pt'>Upload</button>
             </fieldset>
           </td>
         </tr>
@@ -65,6 +65,16 @@
     </form>
     </div>
     <br>
+    <div>
+      <a id='btn_first' class='btn btn-default' style='font-size:20pt'>First</a>
+      <a id='btn_back10' class='btn btn-default' style='font-size:20pt'>Back 10</a>
+      <a id='btn_prev' class='btn btn-default' style='font-size:20pt'>Prev</a>
+      <a id='btn_null' class='btn btn-default' style='font-size:20pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+      <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
+      <a id='btn_fwd10' class='btn btn-default' style='font-size:20pt'>Fwd 10</a>
+      <a id='btn_last' class='btn btn-default' style='font-size:20pt'>Last</a>
+    </div>
+    <br><br>
     <div>
       <a id='btn_move' class='btn btn-default' style='font-size:20pt'>Move</a>
       <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
@@ -74,15 +84,6 @@
     </div>
     <br>
     <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
-    <br>
-    <div>
-      <a id='btn_first' class='btn btn-default' style='font-size:20pt'>First</a>
-      <a id='btn_back10' class='btn btn-default' style='font-size:20pt'>Back 10</a>
-      <a id='btn_prev' class='btn btn-default' style='font-size:20pt'>Prev</a>
-      <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
-      <a id='btn_fwd10' class='btn btn-default' style='font-size:20pt'>Fwd 10</a>
-      <a id='btn_last' class='btn btn-default' style='font-size:20pt'>Last</a>
-    </div>
 
     <!-- Our own JS -->
     <script type='text/javascript'>
@@ -107,6 +108,7 @@
      var g_last_x = -1
      var g_last_y = -1
      var g_last_hover = false
+     var g_cur_btn = ''
 
      //------------------------
      function resetGame() {
@@ -398,8 +400,17 @@
          })
        })
 
-       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1) })
-       $('#btn_next').click( () => { gotoMove( g_record_pos + 1) })
+       function set_red( id) {
+         $('#btn_prev').css( 'background-color', 'white')
+         $('#btn_next').css( 'background-color', 'white')
+         if (id) {
+           $(id).css( 'background-color', 'red')
+         }
+       } // set_red()
+
+       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); g_cur_btn = 'prev'; set_red( '#btn_prev') })
+       $('#btn_next').click( () => { gotoMove( g_record_pos + 1); g_cur_btn = 'next'; set_red( '#btn_next') })
+       $('#btn_null').click( () => { gotoMove( g_record_pos + 1); g_cur_btn = ''; set_red('') })
        $('#btn_back10').click( () => { gotoMove( g_record_pos - 10) })
        $('#btn_fwd10').click( () => { gotoMove( g_record_pos + 10) })
        $('#btn_first').click( () => { gotoMove( 1) })

@@ -479,7 +479,7 @@ Board.prototype.playMove = function(coord, stone, ko) {
         captures = captures.concat(g.group);
         // save captured coordinates so we don't capture them twice
         for(var j=0; j<g.group.length; j++)
-          captured[g.group[j].toString()] = true; 
+          captured[g.group[j].toString()] = true;
       }
     }
   }
@@ -1676,7 +1676,7 @@ function sgfMove(node, name, values, moveMarks) {
 
   if(moveMarks && play.ko)
       node.setMark(play.ko, C.MARK.SQUARE);
-  
+
   if(play.success && coord !== null) {
     node.setType(coord, player); // play stone
     node.setType(play.captures, C.CLEAR); // clear opponent's stones

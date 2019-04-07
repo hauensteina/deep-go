@@ -37,7 +37,9 @@
 
     <!-- Page HTML    -->
     <br>
-    <div style='font-size:20pt;text-align:center;'>Scoring Test</div>
+    <!-- <div style='font-size:20pt;text-align:center;'>Scoring Test</div> -->
+    <div id='game_info' style='font-size:16pt;text-align:center;'> &nbsp; </div>
+    <div id='fname' style='font-size:16pt;text-align:center;'> &nbsp; </div>
     <!-- <div id='board' style='width:150px'></div> -->
     <div id='board'></div>
     <div>
@@ -47,6 +49,8 @@
     <!-- A huge button to repeat last nav action -->
     <div>
       <a id='btn_again' class='btn btn-default' style='font-size:40pt'>AGAIN</a>
+      &emsp;&emsp;&emsp;&emsp;&emsp;
+      <a id='btn_nnscore' class='btn btn-default' style='font-size:40pt'>SCORE</a>
     </div>
     <br><br><br><br>
     <!-- Nav Buttons -->
@@ -54,7 +58,6 @@
       <a id='btn_first' class='btn btn-default' style='font-size:20pt'>First</a>
       <a id='btn_back10' class='btn btn-default' style='font-size:20pt'>Back 10</a>
       <a id='btn_prev' class='btn btn-default' style='font-size:20pt'>Prev</a>
-      <a id='btn_null' class='btn btn-default' style='font-size:20pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
       <a id='btn_next' class='btn btn-default' style='font-size:20pt'>Next</a>
       <a id='btn_fwd10' class='btn btn-default' style='font-size:20pt'>Fwd 10</a>
       <a id='btn_last' class='btn btn-default' style='font-size:20pt'>Last</a>
@@ -65,7 +68,7 @@
            <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
            <a id='btn_pause' class='btn btn-default' style='font-size:20pt'>Pause</a>
            <a id='btn_score' class='btn btn-default' style='font-size:20pt'>Score</a> -->
-      <a id='btn_nnscore' class='btn btn-default' style='font-size:20pt'>NNScore</a>
+      <!-- <a id='btn_nnscore' class='btn btn-default' style='font-size:20pt'>NNScore</a> -->
     </div>
     <!-- <br>
          <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
@@ -123,10 +126,15 @@
          cache: false,
          processData: false,
          success: (response) => {
-           var moves = response.result
+           var res = response.result
+           var moves = res.moves
            replayMoveList( moves)
            g_complete_record = g_record.slice()
            g_record_pos = g_complete_record.length
+           var winner = res.winner.toUpperCase()
+           // Game Info
+           $('#game_info').html( `B:${res.pb} &nbsp;&nbsp; W:${res.pw} &nbsp;&nbsp; Winner:${winner}`)
+           $('#fname').html( res.fname)
          },
        })
      }) // $(document)
@@ -277,13 +285,22 @@
                //debugger
                var black_points = data.result[0]
                var white_points = data.result[1]
-               $('#status').html( `Black: ${black_points}    White: ${white_points}`)
+               var diff = Math.abs( black_points - white_points)
+               var rstr = `W+${diff}`
+               if (black_points >= white_points) { rstr = `B+${diff}` }
+               $('#status').html( `Black:${black_points} &emsp; White:${white_points} &emsp; ${rstr}`)
                var node = g_jrecord.createNode( true)
                for (var bpoint of data.territory.black_points) {
-                 node.setMark( rc2Jgo( bpoint[0], bpoint[1]), JGO.MARK.BLACK_TERRITORY)
+                 var coord = rc2Jgo( bpoint[0], bpoint[1])
+                 if (node.jboard.stones [coord.i] [coord.j] != 1) {
+                   node.setMark( rc2Jgo( bpoint[0], bpoint[1]), JGO.MARK.BLACK_TERRITORY)
+                 }
                }
                for (var wpoint of data.territory.white_points) {
-                 node.setMark( rc2Jgo( wpoint[0], wpoint[1]), JGO.MARK.WHITE_TERRITORY)
+                 var coord = rc2Jgo( wpoint[0], wpoint[1])
+                 if (node.jboard.stones [coord.i] [coord.j] != 2) {
+                   node.setMark( rc2Jgo( wpoint[0], wpoint[1]), JGO.MARK.WHITE_TERRITORY)
+                 }
                }
                for (var dpoint of data.territory.dame_points) {
                  node.setMark( rc2Jgo( dpoint[0], dpoint[1]), JGO.MARK.TRIANGLE)
@@ -416,11 +433,10 @@
 
        $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_red( '#btn_prev') })
        $('#btn_next').click( () => { gotoMove( g_record_pos + 1); set_red( '#btn_next') })
-       $('#btn_null').click( () => { set_red('') })
        $('#btn_back10').click( () => { set_red(''); gotoMove( g_record_pos - 10) })
        $('#btn_fwd10').click( () => { set_red(''); gotoMove( g_record_pos + 10) })
-       $('#btn_first').click( () => { set_red(''); gotoMove( 1) })
-       $('#btn_last').click( () => { set_red(''); gotoMove( g_complete_record.length) })
+       $('#btn_first').click( () => { set_red( '#btn_next'); gotoMove( 1) })
+       $('#btn_last').click( () => { set_red( '#btn_prev'); gotoMove( g_complete_record.length) })
        $('#btn_again').click( () => { if (g_cur_btn) { $(g_cur_btn).click() } })
 
 

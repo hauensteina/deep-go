@@ -165,7 +165,13 @@ def get_web_app(bot_map):
         f = request.files['file']
         sgfstr = f.read()
         sgf = Sgf_game.from_string( sgfstr)
-        res = []
+        player_white = sgf.get_player_name('w')
+        player_black = sgf.get_player_name('b')
+        winner = sgf.get_winner()
+        fname = f.filename
+
+        res = {}
+        moves = []
 
         #------------------------
         def move2coords( move):
@@ -178,8 +184,8 @@ def get_web_app(bot_map):
         if sgf.get_handicap() is not None and sgf.get_handicap() != 0:
             for setup in sgf.get_root().get_setup_stones():
                 for idx, move in enumerate( setup):
-                    if idx > 0: res.append( 'pass')
-                    res.append( move2coords( move))
+                    if idx > 0: moves.append( 'pass')
+                    moves.append( move2coords( move))
 
         # Nodes in the main sequence
         for item in sgf.main_sequence_iter():
@@ -187,15 +193,15 @@ def get_web_app(bot_map):
             point = None
             if color is not None:
                 if move_tuple is not None:
-                    res.append( move2coords( move_tuple))
+                    moves.append( move2coords( move_tuple))
                 else:
-                    res.append( 'pass')
+                    moves.append( 'pass')
             # Deal with handicap stones as individual nodes
             elif item.get_setup_stones()[0]:
                 move = list( item.get_setup_stones()[0])[0]
-                if res: res.append( 'pass')
-                res.append( move2coords( move))
+                if moves: moves.append( 'pass')
+                moves.append( move2coords( move))
 
-        return jsonify( {'result': res})
+        return jsonify( {'result': {'moves':moves, 'pb':player_black, 'pw':player_white, 'winner':winner, 'fname':fname} } )
 
     return app

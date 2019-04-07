@@ -280,6 +280,13 @@ class Board():
             return None
         return string
 
+    # Return the strings in an array
+    #----------------------------------
+    def get_go_strings(self):
+        strings = list(set(self._grid.values()))
+        strings = [s for s in strings if s]
+        return strings
+
     #--------------------------
     def __eq__( self, other):
         return isinstance( other, Board) and \

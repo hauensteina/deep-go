@@ -32,7 +32,7 @@ class Model:
 
     #-----------------------
     def build_model(self):
-        nplanes = 1
+        nplanes = 2
         nfilters = 192
         inputs = kl.Input( shape = ( self.boardsz, self.boardsz, nplanes), name = 'position')
 

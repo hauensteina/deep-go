@@ -34,12 +34,14 @@ SCRIPTPATH = os.path.dirname(os.path.realpath( __file__))
 sys.path.append( re.sub(r'/proj/.*',r'/', SCRIPTPATH))
 
 #import pylib.ahnutil as ut
-import score_model as m
+#import score_model as m
 #import small_conv_dense as m
 #import small_conv_pool as m
 #import medium_conv_pool as m
 #import large_conv_pool as m
 #import ttmodel as m
+#import model_avgpool as m
+import model_alpha as m
 
 num_cores = 8
 GPU=1

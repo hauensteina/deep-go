@@ -32,7 +32,7 @@ class Model:
 
     #-----------------------
     def build_model(self):
-        nplanes = 1
+        nplanes = 2
         inputs = kl.Input( shape = ( self.boardsz, self.boardsz, nplanes), name = 'position')
 
         x = kl.Conv2D( 64, (5,5), activation='relu', padding='same', name='one_a')(inputs)
@@ -44,12 +44,12 @@ class Model:
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
 
-        x = kl.Conv2D( 512, (3,3), activation='relu', padding='same', name='two_a1')(x)
-        x = kl.BatchNormalization(axis=-1)(x)
-
-        x = kl.Conv2D( 1024,(3,3), activation='relu', padding='same', name='three_a1')(x)
+        x = kl.Conv2D( 256, (3,3), activation='relu', padding='same', name='two_a1')(x)
         x = kl.BatchNormalization(axis=-1)(x)
         x = kl.MaxPooling2D()(x)
+
+        x = kl.Conv2D( 768,(3,3), activation='relu', padding='same', name='three_a1')(x)
+        x = kl.BatchNormalization(axis=-1)(x)
 
         # Classification block
         x_class_conv = kl.Conv2D( 361, (1,1), padding='same', name='lastconv')(x)

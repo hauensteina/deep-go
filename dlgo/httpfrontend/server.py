@@ -151,7 +151,7 @@ def get_web_app(bot_map):
                 next_move = goboard.Move.play( point_from_coords(move))
             game_state = game_state.apply_move( next_move)
 
-        enc  = get_encoder_by_name( 'score_encoder', board_size)
+        enc  = get_encoder_by_name( 'score_stringonly_encoder', board_size)
         feat = np.array( [ enc.encode( game_state) ] )
         lab  = SCOREMODEL.predict( [feat], batch_size=1)
 

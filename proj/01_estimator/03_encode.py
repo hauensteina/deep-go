@@ -33,7 +33,10 @@ REWINDS = (50, 75, 100, 125)
 #REWINDS = (125, 150, 175, 200)
 #REWINDS = (150, 175, 200, 225)
 
-ENCODER = 'score_encoder'
+ENCODER = 'score_twoplane_encoder'
+#ENCODER = 'score_stringonly_encoder'
+#ENCODER = 'score_string_encoder'
+#ENCODER = 'score_encoder'
 CHUNKSIZE = 1000
 
 # Generate encoded positions and labels to train a score estimator.

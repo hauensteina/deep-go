@@ -46,22 +46,9 @@
     <!-- Input form for sgf file upload -->
     <div>
     <form id="upload-file" method="post" enctype="multipart/form-data">
-      <table class='center'>
-        <tr>
-          <td>
-            <fieldset>
-              <input name="file" type="file" style='font-size:20pt'>
-            </fieldset>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <fieldset>
-              <button id="upload-file-btn" type="button" style='font-size:20pt'>Upload</button>
-            </fieldset>
-          </td>
-        </tr>
-      </table>
+      <label class="btn btn-default btn-file" style='font-size:20pt'>
+        Upload sgf <input type="file" style="display: none;">
+      </label>
     </form>
     </div>
     <br>
@@ -109,6 +96,32 @@
      var g_last_y = -1
      var g_last_hover = false
      var g_cur_btn = ''
+
+     // Triggers when user chooses file
+     //----------------------------------------------------
+     $(document).on('change', ':file', function() {
+       var input = $(this)
+       var myfile = input.get(0).files[0]
+       var numFiles = input.get(0).files ? input.get(0).files.length : 1
+       var label = input.val().replace(/\\/g, '/').replace(/.*\//, '')
+       var form_data = new FormData()
+       form_data.append( 'file', myfile)
+       // Call API to parse sgf and replay it on the board
+       $.ajax({
+         type: 'POST',
+         url: '/sgf2list',
+         data: form_data,
+         contentType: false,
+         cache: false,
+         processData: false,
+         success: (response) => {
+           var moves = response.result
+           replayMoveList( moves)
+           g_complete_record = g_record.slice()
+           g_record_pos = g_complete_record.length
+         },
+       })
+     }) // $(document)
 
      //------------------------
      function resetGame() {
@@ -380,24 +393,6 @@
          console.log( 'nnscore clicked')
          scorePosition( 'nnscore')
          return false
-       })
-
-       $('#upload-file-btn').click( () => {
-         var form_data = new FormData($('#upload-file')[0])
-         $.ajax({
-           type: 'POST',
-           url: '/sgf2list',
-           data: form_data,
-           contentType: false,
-           cache: false,
-           processData: false,
-           success: (response) => {
-             var moves = response.result
-             replayMoveList( moves)
-             g_complete_record = g_record.slice()
-             g_record_pos = g_complete_record.length
-           },
-         })
        })
 
        function set_red( id) {

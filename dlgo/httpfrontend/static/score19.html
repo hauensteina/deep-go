@@ -48,7 +48,7 @@
     <br><br>
     <!-- A huge button to repeat last nav action -->
     <div>
-      <a id='btn_again' class='btn btn-default' style='font-size:40pt'>AGAIN</a>
+      <a id='btn_again' class='btn btn-default' style='font-size:40pt'>NEXT</a>
       &emsp;&emsp;&emsp;&emsp;&emsp;
       <a id='btn_nnscore' class='btn btn-default' style='font-size:40pt'>SCORE</a>
     </div>
@@ -106,7 +106,7 @@
      var g_last_x = -1
      var g_last_y = -1
      var g_last_hover = false
-     var g_cur_btn = ''
+     var g_cur_btn = 'btn_next'
 
      // Triggers when user chooses file
      //----------------------------------------------------
@@ -135,6 +135,7 @@
            // Game Info
            $('#game_info').html( `B:${res.pb} &nbsp;&nbsp; W:${res.pw} &nbsp;&nbsp; Winner:${winner}`)
            $('#fname').html( res.fname)
+           set_again( '#btn_prev')
          },
        })
      }) // $(document)
@@ -385,6 +386,18 @@
        g_record_pos = n
      } // gotoMove()
 
+     // Set the big button to next or prev
+     //-------------------------------------
+     function set_again( id) {
+       g_cur_btn = '#btn_next'
+       $('#btn_again').html('NEXT')
+
+       if (id == '#btn_prev') {
+         g_cur_btn = '#btn_prev'
+         $('#btn_again').html('PREV')
+       }
+     } // set_again()
+
      // Set button callbacks
      //-------------------------------------
      function set_btn_handlers() {
@@ -420,23 +433,12 @@
          return false
        })
 
-       function set_red( id) {
-         g_cur_btn = id
-         $('#btn_prev').css( 'background-color', 'white')
-         $('#btn_next').css( 'background-color', 'white')
-         $('#btn_again').css( 'background-color', 'white')
-         if (id) {
-           $(id).css( 'background-color', 'red')
-           $('#btn_again').css( 'background-color', 'red')
-         }
-       } // set_red()
-
-       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_red( '#btn_prev') })
-       $('#btn_next').click( () => { gotoMove( g_record_pos + 1); set_red( '#btn_next') })
-       $('#btn_back10').click( () => { set_red(''); gotoMove( g_record_pos - 10) })
-       $('#btn_fwd10').click( () => { set_red(''); gotoMove( g_record_pos + 10) })
-       $('#btn_first').click( () => { set_red( '#btn_next'); gotoMove( 1) })
-       $('#btn_last').click( () => { set_red( '#btn_prev'); gotoMove( g_complete_record.length) })
+       $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_again( '#btn_prev') })
+       $('#btn_next').click( () => { gotoMove( g_record_pos + 1); set_again( '#btn_next') })
+       $('#btn_back10').click( () => { set_again(''); gotoMove( g_record_pos - 10) })
+       $('#btn_fwd10').click( () => { set_again(''); gotoMove( g_record_pos + 10) })
+       $('#btn_first').click( () => { set_again( '#btn_next'); gotoMove( 1) })
+       $('#btn_last').click( () => { set_again( '#btn_prev'); gotoMove( g_complete_record.length) })
        $('#btn_again').click( () => { if (g_cur_btn) { $(g_cur_btn).click() } })
 
 

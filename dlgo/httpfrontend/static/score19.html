@@ -45,6 +45,7 @@
     <div>
       <div id='status' style='font-size:22pt'> &nbsp; </div>
     </div>
+    <br>
     <!-- A huge button to repeat last nav action -->
     <div>
       <a id='btn_again' class='btn btn-default' style='font-size:40pt'>NEXT</a>
@@ -205,7 +206,7 @@
        }
        else {
          clearInterval( g_timer)
-         tstr = player + coord
+         var tstr = player + coord
          var node = g_jrecord.getCurrentNode()
          node.setMark( coord, JGO.MARK.SQUARE)
          alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
@@ -487,8 +488,14 @@
                // clear hover away
                if (g_last_hover) { jboard.setType(new JGO.Coordinate( g_last_x, g_last_y), JGO.CLEAR) }
                g_last_hover = false
-               applyMove( g_player, coord);
-               g_player = (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+               //applyMove( g_player, coord);
+               var mstr = coordsToString( coord)
+               g_complete_record = g_record.slice()
+               g_complete_record.push( mstr)
+               gotoMove( g_complete_record.length)
+               //debugger
+               //var tt=42
+               //g_player = (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
              }
            ) // click
 

@@ -908,6 +908,7 @@ Canvas.prototype.draw = function(jboard, i1, j1, i2, j2) {
         break;
       case C.WHITE:
       case C.DIM_WHITE:
+        debugger
         this.ctx.globalAlpha = type == C.WHITE ? 1 : this.opt.stone.dimAlpha;
         this.stones.drawStone(this.ctx, type, ox, oy);
         markColor = this.opt.mark.whiteColor; // if we have marks, this is the color
@@ -2064,7 +2065,7 @@ Stones.prototype.drawStone = function(ctx, type, ox, oy, scale) {
   var stone = (type == C.BLACK || type == C.DIM_BLACK) ? this.images.black : this.images.white;
 
   if(!stone) { // BW
-    ctx.fillStyle = (type == C.WHITE) ? '#DDDDCC' : '#000000';
+    ctx.fillStyle = (type == C.WHITE || type == C.DIM_WHITE) ? '#DDDDCC' : '#000000';
     ctx.beginPath();
     ctx.arc(ox, oy, this.stoneR*scale, 2*Math.PI, false);
     ctx.fill();

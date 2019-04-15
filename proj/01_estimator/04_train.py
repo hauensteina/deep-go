@@ -85,14 +85,16 @@ class Generator:
     #--------------------------------------
     def __init__( self, data_directory):
         self.datadir = data_directory + '/chunks'
-        self.fnames = glob.glob( self.datadir + '/feat_*.npy')
+        self.fnames = glob.glob( self.datadir + '/*_feat.npy')
 
     #--------------------------------------
     def generate( self, batch_size=100):
+        fnames = self.fnames.copy()
         while(1):
-            featname = np.random.choice( self.fnames)
+            featname = np.random.choice( fnames)
+            fnames.remove( featname)
             #print( '\ngetting batches from %s' % featname)
-            labname  = featname.replace( 'feat_', 'lab_')
+            labname  = featname.replace( '_feat', '_lab')
             feats = np.load( featname)
             labs = np.load( labname)
             if feats.shape[0] % batch_size:
@@ -101,6 +103,10 @@ class Generator:
                 feat_batch, feats = feats[:batch_size], feats[batch_size:]
                 lab_batch, labs = labs[:batch_size], labs[batch_size:]
                 yield feat_batch, lab_batch
+            if len(fnames) == 0:
+                print( 'Seen all training material, starting over')
+                fnames = self.fnames.copy()
+
 
 #-----------
 def main():

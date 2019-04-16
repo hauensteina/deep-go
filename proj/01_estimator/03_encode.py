@@ -32,7 +32,7 @@ from dlgo.scoring import compute_game_result
 import pylib.ahnutil as ut
 
 #REWINDS = (200,150,100,50,0) # How far to rewind from game end
-REWINDS = (50, 100, 150, -50, -60, -70, -80, -90, -100, 110, -120)
+REWINDS = (50, 100, 150, -50, -60, -70, -80, -90, -100, -110, -120)
 #REWINDS = (125, 150, 175, 200)
 #REWINDS = (150, 175, 200, 225)
 

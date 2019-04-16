@@ -32,11 +32,12 @@ from dlgo.scoring import compute_game_result
 import pylib.ahnutil as ut
 
 #REWINDS = (200,150,100,50,0) # How far to rewind from game end
-REWINDS = (50, 75, 100, 125)
+REWINDS = (50, 100, 150, -50, -60, -70, -80, -90, -100, 110, -120)
 #REWINDS = (125, 150, 175, 200)
 #REWINDS = (150, 175, 200, 225)
 
-ENCODER = 'score_twoplane_encoder'
+ENCODER = 'score_threeplane_encoder'
+#ENCODER = 'score_twoplane_encoder'
 #ENCODER = 'score_stringonly_encoder'
 #ENCODER = 'score_string_generator'
 #ENCODER = 'score_encoder'
@@ -114,7 +115,7 @@ def worker( fname_rewinds):
                     move = Move.pass_turn()
                 game_state = game_state.apply_move( move)
                 move_counter += 1
-            if move_counter == nmoves - rewind:
+            if (rewind < 0 and move_counter == nmoves + rewind) or (rewind > 0 and move_counter == rewind):
                 encoded = g_generator.encoder.encode( game_state)
                 # Get all eight symmetries
                 featsyms = ut.syms( encoded)
@@ -192,7 +193,7 @@ class ScoreDataGenerator:
         # Farm out to processes
         p = Pool( self.nprocs)
         p.map( worker, fname_rewinds)
-        # worker( fname_rewinds[0])
+        #worker( fname_rewinds[0])
 
 if __name__ == '__main__':
     main()

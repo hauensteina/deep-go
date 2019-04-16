@@ -89,8 +89,11 @@ class Generator:
 
     #--------------------------------------
     def generate( self, batch_size=100):
-        fnames = self.fnames.copy()
+        fnames =  self.fnames.copy()
         while(1):
+            if len(fnames) == 0:
+                print( '\n>>>>>>>>>>>> Seen all training material, starting over')
+                fnames = self.fnames.copy()
             featname = np.random.choice( fnames)
             fnames.remove( featname)
             #print( '\ngetting batches from %s' % featname)
@@ -103,9 +106,6 @@ class Generator:
                 feat_batch, feats = feats[:batch_size], feats[batch_size:]
                 lab_batch, labs = labs[:batch_size], labs[batch_size:]
                 yield feat_batch, lab_batch
-            if len(fnames) == 0:
-                print( 'Seen all training material, starting over')
-                fnames = self.fnames.copy()
 
 
 #-----------

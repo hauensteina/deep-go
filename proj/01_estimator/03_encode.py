@@ -41,7 +41,6 @@ ENCODER = 'score_twoplane_encoder'
 #ENCODER = 'score_string_generator'
 #ENCODER = 'score_encoder'
 CHUNKSIZE = 1000
-NPROCS = 8
 
 g_generator = None
 
@@ -52,9 +51,10 @@ def usage( printmsg=False):
     Name:
       %s -- Encode sgf files below a folder into numpy arrays and save them
     Synopsis:
-      %s --folder <folder>
+      %s --folder <folder> --nprocs <nprocs>
     Description:
-       Results go to <folder>_feat.npy and <folder>_lab.npy
+       Results go to <folder>/chunks.
+       The --nprocs option decides how many processes to use.
     Example:
       %s --folder train
       Output will be in train_feat.npy and train_lab.npy
@@ -74,9 +74,10 @@ def main():
 
     parser = argparse.ArgumentParser( usage=usage())
     parser.add_argument( "--folder", required=True)
+    parser.add_argument( "--nprocs", required=False, type=int, default=1)
     args = parser.parse_args()
 
-    g_generator = ScoreDataGenerator( NPROCS, data_directory = args.folder)
+    g_generator = ScoreDataGenerator( args.nprocs, data_directory = args.folder)
     g_generator.encode_sgf_files()
 
 #-------------------------------
@@ -121,6 +122,7 @@ def worker( fname_rewinds):
                 labsyms = [x.flatten() for x in labsyms]
                 features.extend( featsyms)
                 labels.extend( labsyms)
+                break
 
 # Generate encoded positions and labels to train a score estimator.
 # Encode snapshots at N-150, N-100, etc in a game of length N.
@@ -184,8 +186,8 @@ class ScoreDataGenerator:
                 procnum = int( ( abs( hash( tstr) / sys.maxsize) * self.nprocs))
                 fname_rewinds[procnum].append( (idx, rewind) )
 
-        for procnum in range( self.nprocs):
-            np.random.shuffle( fname_rewinds[procnum])
+        #for procnum in range( self.nprocs):
+        #    np.random.shuffle( fname_rewinds[procnum])
 
         # Farm out to processes
         p = Pool( self.nprocs)

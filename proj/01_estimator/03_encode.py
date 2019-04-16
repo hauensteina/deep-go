@@ -114,7 +114,7 @@ def worker( fname_rewinds):
                     move = Move.pass_turn()
                 game_state = game_state.apply_move( move)
                 move_counter += 1
-            if move_counter == rewind:
+            if move_counter == nmoves - rewind:
                 encoded = g_generator.encoder.encode( game_state)
                 # Get all eight symmetries
                 featsyms = ut.syms( encoded)
@@ -186,8 +186,8 @@ class ScoreDataGenerator:
                 procnum = int( ( abs( hash( tstr) / sys.maxsize) * self.nprocs))
                 fname_rewinds[procnum].append( (idx, rewind) )
 
-        #for procnum in range( self.nprocs):
-        #    np.random.shuffle( fname_rewinds[procnum])
+        for procnum in range( self.nprocs):
+           np.random.shuffle( fname_rewinds[procnum])
 
         # Farm out to processes
         p = Pool( self.nprocs)

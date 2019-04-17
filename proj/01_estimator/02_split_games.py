@@ -32,7 +32,7 @@ def usage(printmsg=False):
       The --ngames option limits the total number of total games going to
       the train, valid, test folders.
     Example:
-      %s --folder sgf --trainpct 80 --validpct 20 --ngames 100
+      %s --folder ../sgf_all --trainpct 80 --validpct 20 --ngames 100
       The remaining 10pct will be test data
     ''' % (name,name,name)
     if printmsg:

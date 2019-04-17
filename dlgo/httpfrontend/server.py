@@ -168,6 +168,7 @@ def get_web_app(bot_map):
         player_white = sgf.get_player_name('w')
         player_black = sgf.get_player_name('b')
         winner = sgf.get_winner()
+        komi = sgf.get_komi()
         fname = f.filename
 
         res = {}
@@ -202,6 +203,7 @@ def get_web_app(bot_map):
                 if moves: moves.append( 'pass')
                 moves.append( move2coords( move))
 
-        return jsonify( {'result': {'moves':moves, 'pb':player_black, 'pw':player_white, 'winner':winner, 'fname':fname} } )
+        return jsonify( {'result': {'moves':moves, 'pb':player_black, 'pw':player_white,
+                                    'winner':winner, 'komi':komi, 'fname':fname} } )
 
     return app

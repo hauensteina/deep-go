@@ -89,6 +89,58 @@ class Generator:
 
     #--------------------------------------
     def generate( self, batch_size=100):
+        return self.generate_bychunk_random( batch_size)
+
+    # A batch of totally random training samples.
+    # GPU usage goes down to 80% because this is slow.
+    #---------------------------------------------------
+    def generate_random( self, batch_size=100):
+        fnames =  self.fnames.copy()
+        while 1:
+            feat_batch = []
+            lab_batch = []
+            for idx in range( batch_size):
+                featname = np.random.choice( fnames)
+                labname  = featname.replace( '_feat', '_lab')
+                feats = np.load( featname)
+                labs = np.load( labname)
+
+                if feats.shape[0] % batch_size:
+                    print( 'Warning: chunk size %d not a multiple of batch size %d' % (feats.shape[0],  batch_size))
+                samp_idx = np.random.randint( feats.shape[0])
+                feat_batch.append( feats[samp_idx])
+                lab_batch.append( labs[samp_idx])
+            yield np.array( feat_batch), np.array( lab_batch)
+
+    # Pull random batches from one chunk at a time.
+    #-------------------------------------------------------
+    def generate_bychunk_random( self, batch_size=100):
+        fnames =  self.fnames.copy()
+        while(1):
+            if len(fnames) == 0:
+                print( '\n>>>>>>>>>>>> Seen all training material, starting over')
+                fnames = self.fnames.copy()
+            featname = np.random.choice( fnames)
+            fnames.remove( featname)
+            #print( '\ngetting batches from %s' % featname)
+            labname  = featname.replace( '_feat', '_lab')
+            feats = np.load( featname)
+            labs = np.load( labname)
+            if feats.shape[0] % batch_size:
+                print( 'Warning: chunk size %d not a multiple of batch size %d' % (feats.shape[0],  batch_size))
+            perm = np.random.permutation(  feats.shape[0])
+            randfeats = np.empty( feats.shape)
+            randlabs = np.empty( labs.shape)
+            for src,target in enumerate(perm):
+                randfeats[target] = feats[src]
+                randlabs[target] = labs[src]
+            while randfeats.shape[0] >= batch_size:
+                feat_batch, randfeats = randfeats[:batch_size], randfeats[batch_size:]
+                lab_batch, randlabs = randlabs[:batch_size], randlabs[batch_size:]
+                yield feat_batch, lab_batch
+
+    #--------------------------------------
+    def generate_bychunk( self, batch_size=100):
         fnames =  self.fnames.copy()
         while(1):
             if len(fnames) == 0:

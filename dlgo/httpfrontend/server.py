@@ -36,31 +36,8 @@ __all__ = [
     'get_web_app',
 ]
 
-SCOREMODEL = None
-
-#----------------------------
-def setup_nnscore_model():
-    global SCOREMODEL
-    num_cores = 8
-    GPU = 0
-
-    if GPU:
-        pass
-    else:
-        num_CPU = 1
-        num_GPU = 0
-        config = tf.ConfigProto( intra_op_parallelism_threads=num_cores,\
-                                 inter_op_parallelism_threads=num_cores, allow_soft_placement=True,\
-                                 device_count = {'CPU' : num_CPU, 'GPU' : num_GPU})
-        session = tf.Session( config=config)
-        K.set_session( session)
-
-        path = os.path.dirname(__file__)
-        SCOREMODEL = kmod.load_model( path + '/nn_score.hd5')
-        SCOREMODEL._make_predict_function()
-
-#---------------------------
-def get_web_app(bot_map):
+#-------------------------------------
+def get_web_app(bot_map, scoremodel):
     """Create a flask application for serving bot moves.
 
     The bot_map maps from URL path fragments to Agent instances.
@@ -82,7 +59,6 @@ def get_web_app(bot_map):
     here = os.path.dirname(__file__)
     static_path = os.path.join(here, 'static')
     app = Flask(__name__, static_folder=static_path, static_url_path='/static')
-    setup_nnscore_model()
 
     @app.route('/select-move/<bot_name>', methods=['POST'])
     # Ask the named bot for the next move
@@ -153,7 +129,7 @@ def get_web_app(bot_map):
 
         enc  = get_encoder_by_name( 'score_threeplane_encoder', board_size)
         feat = np.array( [ enc.encode( game_state) ] )
-        lab  = SCOREMODEL.predict( [feat], batch_size=1)
+        lab  = scoremodel.predict( [feat], batch_size=1)
 
         territory, res = compute_nn_game_result( lab)
         return jsonify( {'result': res, 'territory': territory.__dict__ })

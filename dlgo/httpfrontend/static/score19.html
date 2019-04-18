@@ -64,16 +64,14 @@
     </div>
     <br><br>
     <div>
-      <!-- <a id='btn_move' class='btn btn-default' style='font-size:20pt'>Move</a>
-           <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
-           <a id='btn_pause' class='btn btn-default' style='font-size:20pt'>Pause</a>
-           <a id='btn_score' class='btn btn-default' style='font-size:20pt'>Score</a> -->
-      <!-- <a id='btn_nnscore' class='btn btn-default' style='font-size:20pt'>NNScore</a> -->
+      <a id='btn_move' class='btn btn-default' style='font-size:20pt'>Move</a>
+      <a id='btn_play' class='btn btn-default' style='font-size:20pt'>Play</a>
+      <a id='btn_pause' class='btn btn-default' style='font-size:20pt'>Pause</a>
+      <a id='btn_score' class='btn btn-default' style='font-size:20pt'>Score</a>
     </div>
-    <!-- <br>
-         <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
-       -->
-     <!-- Our own JS -->
+    <br>
+    <div> <a id='btn_new' class='btn btn-default' style='font-size:20pt'>New Game</a></div>
+    <br>
     <!-- Input form for sgf file upload -->
     <div>
       <form id="upload-file" method="post" enctype="multipart/form-data">
@@ -86,7 +84,8 @@
     <script type='text/javascript'>
      "use strict"
 
-     const BOT = 'smartrandom'
+     //const BOT = 'smartrandom'
+     const BOT = 'leelabot'
      const BOARD_SIZE = 19
      const COLNAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
      const AUTOPLAY_MOVE_DUR_MS = 1000

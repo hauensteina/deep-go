@@ -131,7 +131,7 @@ def get_web_app(bot_map, scoremodel):
         feat = np.array( [ enc.encode( game_state) ] )
         lab  = scoremodel.predict( [feat], batch_size=1)
 
-        territory, res = compute_nn_game_result( lab)
+        territory, res = compute_nn_game_result( lab, game_state.next_player)
         return jsonify( {'result': res, 'territory': territory.__dict__ })
 
     @app.route('/sgf2list', methods=['POST'])

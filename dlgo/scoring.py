@@ -149,26 +149,50 @@ def compute_game_result( game_state):
                 komi=7.5)
     )
 
-# Turn nn output into the expected scoring format
+# Turn nn output into the expected scoring format.
+# Called from server.py
 #----------------------------------------------------
-def compute_nn_game_result( labels):
+def compute_nn_game_result( labels, next_player):
     lim = 0.5 # Between B and W
+    tol = 0.075 # Closer to 0.5 than tol is dame. Smaller means less dame.
     labels = labels[0,:]
     n_isecs = len(labels)
     boardsize = int(round(np.sqrt(n_isecs)))
     terrmap = {}
+    bpoints = 0
+    wpoints = 0
+    dame = 0
+    ssum = 0
     for r in range( 1, boardsize+1):
         for c in range( 1, boardsize+1):
             p = Point( row=r, col=c)
-            if labels[ (r-1)*boardsize + c - 1] <= lim:
+            prob_white = labels[ (r-1)*boardsize + c - 1]
+            wpoints += prob_white
+            if prob_white <= lim - tol:
                 terrmap[p] = 'territory_b'
-            elif labels[ (r-1)*boardsize + c - 1] > lim:
+                #bpoints += 1
+            elif prob_white > lim + tol:
                 terrmap[p] = 'territory_w'
-            else: terrmap[p] = 'dame'
+                #wpoints += 1
+            else:
+                terrmap[p] = 'dame'
+                dame += 1
     territory = Territory( terrmap)
+    # bpoints += int( dame / 2)
+    # wpoints += int( dame / 2)
+    wpoints = int(round(wpoints))
+    bpoints = n_isecs - wpoints
+    # if dame % 2:
+    #     if next_player == Player.white:
+    #         wpoints += 1
+    #     else:
+    #         bpoints += 1
+
     return (territory,
             GameResult(
-                territory.num_black_territory,
-                territory.num_white_territory,
-                komi=7.5)
+                bpoints,
+                wpoints,
+                # territory.num_black_territory,
+                # territory.num_white_territory,
+                komi=0)
     )

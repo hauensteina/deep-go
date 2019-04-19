@@ -38,7 +38,7 @@ def is_point_an_eye(board, point, color):
     for corner in corners:
         if board.is_on_grid(corner):
             corner_color = board.get(corner)
-            if corner_color == color:
+            if corner_color is None or corner_color == color:
                 friendly_corners += 1
         else:
             off_board_corners += 1

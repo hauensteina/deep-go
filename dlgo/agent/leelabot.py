@@ -57,9 +57,9 @@ class LeelaBot( Agent):
         print( 'Probs:'); print( sorted(move_probs, reverse=True)[:3])
         for point_idx in ranked_moves:
             point = self.encoder.decode_point_index( point_idx)
-            if (game_state.is_valid_move( goboard.Move.play( point))
-                  and not is_point_an_eye( game_state.board, point, game_state.next_player)):
-                print( 'played: %d' % point_idx)
-                return goboard.Move.play( point)
+            if (game_state.is_valid_move( goboard.Move.play( point))):
+                if not is_point_an_eye( game_state.board, point, game_state.next_player):
+                    print( 'played: %d' % point_idx)
+                    return goboard.Move.play( point)
 
         return goboard.Move.pass_turn()

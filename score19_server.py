@@ -56,7 +56,7 @@ def setup_models():
 print( 'Point your browser at http://127.0.0.1:5000/static/score19.html')
 setup_models()
 smart_random_agent = FastSmartRandomBot()
-leelabot = LeelaBot( LEELABOTMODEL)
+leelabot = LeelaBot( LEELABOTMODEL, SCOREMODEL )
 
 web_app = get_web_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot}, SCOREMODEL )
 

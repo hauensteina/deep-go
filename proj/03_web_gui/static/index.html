@@ -42,8 +42,8 @@
       <div id='status' style='font-size:22pt'> &nbsp; </div>
     </div>
     <br>
-    <!-- A huge button to repeat last nav action -->
     <div>
+      <!-- A huge button to repeat last nav action -->
       <a id='btn_again' class='btn btn-outline-light' style='font-size:40pt;touch-action:manipulation;'>NEXT</a>
       &emsp;&emsp;&emsp;&emsp;&emsp;
       <a id='btn_nnscore' class='btn btn-outline-light' style='font-size:40pt'>SCORE</a>
@@ -76,6 +76,10 @@
         </label>
       </form>
     </div>
+    <!-- Line chart for histo -->
+    <div id='histo' class='center' style='width:500px;height:300px; border-style:solid; border-color:red; '>
+    </div>
+
     <!-- Line chart with score confidence histo -->
 
     <br><br>
@@ -279,6 +283,12 @@
        return new JGO.Coordinate( col - 1, BOARD_SIZE - row)
      } // rc2Jgo
 
+     // Plot histogram of territory probabilities
+     //---------------------------------------------
+     function plot_histo( data) {
+       axutil.plot_line( '#histo', [[0,0],[1,1],[2,2]], [0,2], [0,2])
+     } // plot_histo
+
      // Score the current position. Endpoint is 'score' or 'nnscore'.
      //----------------------------------------------------------------
      function scorePosition( endpoint)
@@ -297,6 +307,7 @@
          function(response) {
            response.json().then(
              function(data) {
+               plot_histo(data)
                //debugger
                var black_points = data.result[0]
                var white_points = data.result[1]

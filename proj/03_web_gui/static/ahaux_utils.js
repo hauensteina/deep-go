@@ -63,7 +63,7 @@ class AhauxUtils
     // Draw the line
     svg.append('path')
       .datum(data) // Binds data to the line
-      .attr('class', 'line') // Assign a class for styling
+      .attr('style', 'fill:none;stroke:#ffab00;stroke-width:3')
       .attr('d', line) // Call the line generator
 
   } // plot_line()

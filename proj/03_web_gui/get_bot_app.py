@@ -19,12 +19,8 @@ from flask import request
 
 from gotypes import Player, Point
 from go_utils import print_board, print_move
-#from dlgo import agent
 import goboard_fast as goboard
 from go_utils import coords_from_point, point_from_coords
-#from dlgo.scoring import compute_game_result, compute_nn_game_result
-#from dlgo.gosgf import Sgf_game
-#from dlgo.encoders.base import get_encoder_by_name
 
 # Return a flask app that will ask the specified bot for a move.
 #-----------------------------------------------------------------

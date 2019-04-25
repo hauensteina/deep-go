@@ -168,7 +168,7 @@ def compute_nn_game_result( labels, next_player):
             p = Point( row=r, col=c)
             prob_white = labels[ (r-1)*boardsize + c - 1]
             wpoints += prob_white
-            if prob_white <= mid - tol:
+            if prob_white < mid - tol:
                 terrmap[p] = 'territory_b'
                 #bpoints += 1
             elif prob_white > mid + tol:

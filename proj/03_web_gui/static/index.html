@@ -288,7 +288,7 @@
      //---------------------------------------------
      function plot_histo( data) {
        var wp = data.white_probs
-       axutil.hit_endpoint( '/histo', [wp,10,0,1], (res) => {
+       axutil.hit_endpoint( '/histo', [wp,20,0,1], (res) => {
          axutil.plot_line( '#histo', res, [0,1], [0,240])
        })
      } // plot_histo()

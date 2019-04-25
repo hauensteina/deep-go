@@ -153,7 +153,7 @@ def compute_game_result( game_state):
 # Called from server.py
 #----------------------------------------------------
 def compute_nn_game_result( labels, next_player):
-    lim = 0.5 # Between B and W
+    mid = 0.5 # Between B and W
     tol = 0.075 # Closer to 0.5 than tol is dame. Smaller means less dame.
     labels = labels[0,:]
     n_isecs = len(labels)
@@ -168,10 +168,10 @@ def compute_nn_game_result( labels, next_player):
             p = Point( row=r, col=c)
             prob_white = labels[ (r-1)*boardsize + c - 1]
             wpoints += prob_white
-            if prob_white <= lim - tol:
+            if prob_white <= mid - tol:
                 terrmap[p] = 'territory_b'
                 #bpoints += 1
-            elif prob_white > lim + tol:
+            elif prob_white > mid + tol:
                 terrmap[p] = 'territory_w'
                 #wpoints += 1
             else:

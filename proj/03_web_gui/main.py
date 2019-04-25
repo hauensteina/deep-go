@@ -66,9 +66,25 @@ def main():
     smart_random_agent = SmartRandomBot()
     leelabot = LeelaBot( LEELABOTMODEL, SCOREMODEL )
 
+    # Get an app with 'select-move/<botname>' endpoints
     app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot} )
 
+    #--------------------------------------
     # Add some more endpoints to the app
+    #--------------------------------------
+
+    @app.route('/histo', methods=['POST'])
+    # Take a bunch of numbers, number of bins, min, max and return a histo.
+    #------------------------------------------------------------------------
+    def histo():
+        data,nbins,mmin,mmax = request.json
+        counts,borders = np.histogram( data, nbins, [mmin, mmax])
+        counts = counts.tolist()
+        borders = borders.tolist()
+        centers = [ (borders[i] + borders[i+1]) / 2.0 for i in range(len(borders)-1) ]
+        res = list(zip( centers, counts))
+        return jsonify( res)
+
     @app.route('/score', methods=['POST'])
     # Score the current position using naive Tromp Taylor
     #------------------------------------------------------
@@ -111,7 +127,8 @@ def main():
         lab  = SCOREMODEL.predict( [feat], batch_size=1)
 
         territory, res = compute_nn_game_result( lab, game_state.next_player)
-        return jsonify( {'result': res, 'territory': territory.__dict__ })
+        white_probs = lab[0].tolist()
+        return jsonify( {'result':res, 'territory':territory.__dict__ , 'white_probs':white_probs} )
 
     @app.route('/sgf2list', methods=['POST'])
     # Convert sgf main var to coordinate list of moves

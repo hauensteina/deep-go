@@ -37,6 +37,7 @@
     <div id='game_info' style='font-size:22pt;text-align:center'> &nbsp; </div>
     <div id='fname' style='font-size:22pt;text-align:center'> &nbsp; </div>
     <!-- <div id='board' style='width:150px'></div> -->
+    <br>
     <div id='board'></div>
     <div>
       <div id='status' style='font-size:22pt'> &nbsp; </div>
@@ -48,7 +49,7 @@
       &emsp;&emsp;&emsp;&emsp;&emsp;
       <a id='btn_nnscore' class='btn btn-outline-light' style='font-size:40pt'>SCORE</a>
     </div>
-    <br><br>
+    <br>
     <!-- Nav Buttons -->
     <div>
       <a id='btn_first' class='btn btn-outline-light' style='font-size:22pt'>First</a>
@@ -76,6 +77,7 @@
         </label>
       </form>
     </div>
+    <br>
     <!-- Line chart for histo -->
     <div id='histo' class='center' style='width:500px;height:300px; border-style:solid; border-color:red; '>
     </div>
@@ -229,7 +231,6 @@
          var node = g_jrecord.getCurrentNode()
          node.setMark( coord, JGO.MARK.SQUARE)
          alert( 'Illegal move: ' + play.errorMsg + ' ' + tstr)
-         //debugger
        }
      } // applyMove()
 
@@ -281,13 +282,16 @@
      //---------------------------------------------------
      function rc2Jgo( row, col) {
        return new JGO.Coordinate( col - 1, BOARD_SIZE - row)
-     } // rc2Jgo
+     } // rc2Jgo()
 
      // Plot histogram of territory probabilities
      //---------------------------------------------
      function plot_histo( data) {
-       axutil.plot_line( '#histo', [[0,0],[1,1],[2,2]], [0,2], [0,2])
-     } // plot_histo
+       var wp = data.white_probs
+       axutil.hit_endpoint( '/histo', [wp,10,0,1], (res) => {
+         axutil.plot_line( '#histo', res, [0,1], [0,240])
+       })
+     } // plot_histo()
 
      // Score the current position. Endpoint is 'score' or 'nnscore'.
      //----------------------------------------------------------------
@@ -308,7 +312,6 @@
            response.json().then(
              function(data) {
                plot_histo(data)
-               //debugger
                var black_points = data.result[0]
                var white_points = data.result[1]
                var diff = Math.abs( black_points - white_points)
@@ -453,7 +456,6 @@
        })
 
        $('#btn_nnscore').click( () => {
-         console.log( 'nnscore clicked')
          scorePosition( 'nnscore')
          return false
        })
@@ -519,9 +521,6 @@
                g_complete_record = g_record.slice()
                g_complete_record.push( mstr)
                gotoMove( g_complete_record.length)
-               //debugger
-               //var tt=42
-               //g_player = (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
              }
            ) // click
 

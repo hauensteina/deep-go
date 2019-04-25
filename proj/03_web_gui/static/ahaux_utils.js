@@ -21,6 +21,7 @@ class AhauxUtils
   plot_line( container, data, xlim, ylim) {
     var [d3,$] = [this.d3, this.$]
     var C = d3.select( container)
+    $(container).html('')
     var width  = $(container).width()
     var height = $(container).height()
 
@@ -67,4 +68,25 @@ class AhauxUtils
       .attr('d', line) // Call the line generator
 
   } // plot_line()
+
+  // Hit any endpoint and call completion with result
+  //---------------------------------------------------
+  hit_endpoint( url, args, completion) {
+    fetch( url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify( args),
+      }
+    ).then( (resp) => {
+      resp.json().then( (resp) => { completion( resp) }) }
+    ).catch(
+      (error) => {
+        console.log( error)
+      }
+    )
+  } // hit_endpoint()
+
 } // class AhauxUtils

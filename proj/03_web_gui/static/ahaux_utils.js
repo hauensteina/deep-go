@@ -11,9 +11,15 @@ class AhauxUtils
   // We need d3 and jquery
   //-------------------------
   constructor( d3, $) {
+    if (d3.version < '5.9.2') {
+      console.log( 'WARNING: AhauxUtils: d3 version ' + d3.version + ' is below 5.9.2. Things might break.')
+    }
+    if ($.prototype.jquery < '3.4.0') {
+      console.log( 'WARNING: AhauxUtils: jquery version ' + $.prototype.jquery + ' is below 3.4.0. Things might break.')
+    }
     this.d3 = d3
     this.$ = $
-  } // contructor()
+  } // constructor()
 
   //----------------------------
   //--- D3 graphics routines ---

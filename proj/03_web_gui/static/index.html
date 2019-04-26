@@ -73,7 +73,7 @@
     <div>
       <form id='upload-file' method='post' enctype='multipart/form-data'>
         <label class='btn btn-outline-light' style='font-size:22pt'>
-          Load sgf <input type='file' style='display:none'>
+          Load sgf <input type='file' id='sgf-file' style='display:none'>
         </label>
       </form>
     </div>
@@ -104,7 +104,7 @@
     <!-- Entry Point -->
     <script type='text/javascript' src='main.js'></script>
 
-    <script type='text/javascript'> main() </script>
+    <script type='text/javascript'> main( JGO, new AhauxUtils( d3, $) ) </script>
 
 
   </body>

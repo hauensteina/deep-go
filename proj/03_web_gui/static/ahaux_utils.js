@@ -72,21 +72,40 @@ class AhauxUtils
   // Hit any endpoint and call completion with result
   //---------------------------------------------------
   hit_endpoint( url, args, completion) {
-    fetch( url,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify( args),
-      }
-    ).then( (resp) => {
-      resp.json().then( (resp) => { completion( resp) }) }
-    ).catch(
-      (error) => {
-        console.log( error)
-      }
-    )
+    if (args.constructor.name == 'File') { // Telling api to do something with a file
+      var myfile = args
+      //debugger
+      var data = new FormData()
+      data.append( 'file',myfile)
+      fetch( url,
+        {
+          method: 'POST',
+          body: data
+        }).then( (resp) => {
+          resp.json().then( (resp) => { completion( resp) }) }
+        ).catch(
+          (error) => {
+            console.log( error)
+          }
+        )
+    } // if file
+    else { // Not a file, regular api call
+      fetch( url,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify( args)
+        }
+      ).then( (resp) => {
+        resp.json().then( (resp) => { completion( resp) }) }
+      ).catch(
+        (error) => {
+          console.log( error)
+        }
+      )
+    } // else
   } // hit_endpoint()
 
 } // class AhauxUtils

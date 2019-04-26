@@ -103,7 +103,7 @@
     <script type='text/javascript'>
      'use strict'
 
-     var axutil = new AhauxUtils( d3, $)
+     const axutil = new AhauxUtils( d3, $)
 
      //const BOT = 'smartrandom'
      const BOT = 'leelabot'
@@ -134,29 +134,19 @@
        var myfile = input.get(0).files[0]
        var numFiles = input.get(0).files ? input.get(0).files.length : 1
        var label = input.val().replace(/\\/g, '/').replace(/.*\//, '')
-       var form_data = new FormData()
-       form_data.append( 'file', myfile)
-       // Call API to parse sgf and replay it on the board
-       $.ajax({
-         type: 'POST',
-         url: '/sgf2list',
-         data: form_data,
-         contentType: false,
-         cache: false,
-         processData: false,
-         success: (response) => {
-           var res = response.result
-           var moves = res.moves
-           replayMoveList( moves)
-           g_complete_record = g_record.slice()
-           g_record_pos = g_complete_record.length
-           var winner = res.winner.toUpperCase()
-           var komi = res.komi
-           // Game Info
-           $('#game_info').html( `B:${res.pb} &nbsp;&nbsp; W:${res.pw} &nbsp;&nbsp; Winner:${winner} &nbsp;&nbsp; Komi:${komi}`)
-           $('#fname').html( res.fname)
-           set_again( '#btn_prev')
-         },
+       // Call API to get the moves, then replay on the board
+       axutil.hit_endpoint( '/sgf2list', myfile, (response) => {
+         var res = response.result
+         var moves = res.moves
+         replayMoveList( moves)
+         g_complete_record = g_record.slice()
+         g_record_pos = g_complete_record.length
+         var winner = res.winner.toUpperCase()
+         var komi = res.komi
+         // Game Info
+         $('#game_info').html( `B:${res.pb} &nbsp;&nbsp; W:${res.pw} &nbsp;&nbsp; Winner:${winner} &nbsp;&nbsp; Komi:${komi}`)
+         $('#fname').html( res.fname)
+         set_again( '#btn_prev')
        })
      }) // $(document)
 

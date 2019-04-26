@@ -233,39 +233,25 @@
          return
        }
        g_waiting_for_bot = true
-       fetch( '/select-move/' + BOT, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify( {'board_size': BOARD_SIZE, 'moves': g_record}),
-       }).then(
-         function(response) {
-           response.json().then(
-             function(data) {
-               if ($('#status').html().startsWith( 'thinking')) {
-                 $('#status').html( '&nbsp;')
-               }
-               if (data.bot_move == 'pass' || data.bot_move == 'resign') {
-                 addMove( data.bot_move)
-                 g_ko = false
-               }
-               else {
-                 var botCoord = stringToCoords( data.bot_move)
-                 applyMove( g_player, botCoord)
-               }
-               g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
-               g_complete_record = g_record.slice()
-               g_record_pos = g_complete_record.length
-               g_waiting_for_bot = false
-             } // func(data)
-           )
-         }
-       ).catch(
-         function(error) {
-           console.log( error)
-         }
-       )
+       axutil.hit_endpoint( '/select-move/' + BOT, {'board_size': BOARD_SIZE, 'moves': g_record},
+         (data) => {
+           debugger
+           if ($('#status').html().startsWith( 'thinking')) {
+             $('#status').html( '&nbsp;')
+           }
+           if (data.bot_move == 'pass' || data.bot_move == 'resign') {
+             addMove( data.bot_move)
+             g_ko = false
+           }
+           else {
+             var botCoord = stringToCoords( data.bot_move)
+             applyMove( g_player, botCoord)
+           }
+           g_player =  (g_player == JGO.BLACK) ? JGO.WHITE : JGO.BLACK
+           g_complete_record = g_record.slice()
+           g_record_pos = g_complete_record.length
+           g_waiting_for_bot = false
+         })
      } // getBotMove()
 
      // Turn a server (row, col) into a JGO coordinate

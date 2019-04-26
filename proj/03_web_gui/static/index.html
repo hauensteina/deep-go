@@ -79,7 +79,8 @@
     </div>
     <br>
     <!-- Line chart for histo -->
-    <div id='histo' class='center' style='width:500px;height:300px; border-style:solid; border-color:red; '>
+    <!-- <div id='histo' class='center' style='width:500px;height:300px; border-style:solid; border-color:red; '> -->
+    <div id='histo' class='center' style='width:750px;height:450px'>
     </div>
 
     <!-- Line chart with score confidence histo -->
@@ -264,7 +265,8 @@
      function plot_histo( data) {
        var wp = data.white_probs
        axutil.hit_endpoint( '/histo', [wp,20,0,1], (res) => {
-         axutil.plot_line( '#histo', res, [0,1], [0,240])
+         //axutil.plot_line( '#histo', res, [0,1], [0,240])
+         axutil.barchart( '#histo', res, 240)
        })
      } // plot_histo()
 

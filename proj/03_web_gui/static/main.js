@@ -1,4 +1,9 @@
 
+/*
+ * Main entry point for web_gui Go board
+ * AHN Apr 2019
+ */
+
 'use strict'
 
 //==============================
@@ -52,6 +57,10 @@ function main( JGO, axutil) {
             g_complete_record = g_record.slice()
             g_complete_record.push( mstr)
             gotoMove( g_complete_record.length)
+            if (hilite_move_btn.v) {
+              $('#status').html( 'thinking...')
+              getBotMove()
+            }
           }
         ) // click
 
@@ -130,7 +139,7 @@ function main( JGO, axutil) {
     // Clear things
     g_jrecord.jboard.clear()
     g_jrecord.root = g_jrecord.current = null
-    g_jrecord.info = {}
+    //g_jrecord.info = {}
   } // resetGame()
 
   //--------------------------------
@@ -224,16 +233,6 @@ function main( JGO, axutil) {
   function rc2Jgo( row, col) {
     return new JGO.Coordinate( col - 1, BOARD_SIZE - row)
   } // rc2Jgo()
-
-  // Plot histogram of territory probabilities
-  //---------------------------------------------
-  function plot_histo( data) {
-    var wp = data.white_probs
-    axutil.hit_endpoint( '/histo', [wp,20,0,1], (res) => {
-      //axutil.plot_line( '#histo', res, [0,1], [0,240])
-      axutil.barchart( '#histo', res, 240)
-    })
-  } // plot_histo()
 
   // Score the current position. Endpoint is 'score' or 'nnscore'.
   //----------------------------------------------------------------
@@ -368,32 +367,26 @@ function main( JGO, axutil) {
     }
   } // set_again()
 
+  //--------------------------------
+  function hilite_move_btn( on) {
+    if (on) {
+      $('#btn_move').css('background-color','#EEEEEE')
+      hilite_move_btn.v = true
+    }
+    else {
+      $('#btn_move').css('background-color','')
+      hilite_move_btn.v = false
+    }
+  } // hilite_move_btn()
+  hilite_move_btn.v = false
+
   // Set button callbacks
-  //-------------------------------------
+  //------------------------------
   function set_btn_handlers() {
-
-    // Buttons
-    $('#btn_new').click( newGame)
-
     $('#btn_move').click( () => {
-      console.log( 'next clicked')
+      hilite_move_btn(true)
       $('#status').html( 'thinking...')
       getBotMove()
-      return false
-    })
-
-    $('#btn_play').click( autoPlay)
-
-    $('#btn_pause').click( () => {
-      console.log( 'pause clicked')
-      $('#status').html( 'paused')
-      clearInterval( g_timer)
-      return false
-    })
-
-    $('#btn_score').click( () => {
-      console.log( 'score clicked')
-      scorePosition( 'score')
       return false
     })
 
@@ -402,23 +395,19 @@ function main( JGO, axutil) {
       return false
     })
 
-    $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_again( '#btn_prev') })
+    $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_again( '#btn_prev'); hilite_move_btn(false) })
     $('#btn_next').click( () => { gotoMove( g_record_pos + 1); set_again( '#btn_next') })
-    $('#btn_back10').click( () => { set_again(''); gotoMove( g_record_pos - 10) })
+    $('#btn_back10').click( () => { set_again(''); gotoMove( g_record_pos - 10); hilite_move_btn(false) })
     $('#btn_fwd10').click( () => { set_again(''); gotoMove( g_record_pos + 10) })
-    $('#btn_first').click( () => { set_again( '#btn_next'); gotoMove( 1) })
+    $('#btn_first').click( () => { set_again( '#btn_next'); resetGame(); hilite_move_btn(false) })
     $('#btn_last').click( () => { set_again( '#btn_prev'); gotoMove( g_complete_record.length) })
     $('#btn_again').click( () => { if (g_cur_btn) { $(g_cur_btn).click() } })
-
-
   } // set_btn_handlers()
 
   // Arrow key actions
   //------------------------
   function checkKey(e) {
-
     e = e || window.event;
-
     if (e.keyCode == '38') { // up arrow
     }
     else if (e.keyCode == '40') { // down arrow
@@ -431,9 +420,13 @@ function main( JGO, axutil) {
     }
   } // checkKey()
 
-  // Load an sgf game
-  //-----------------------------
-  function btn_load_sgf() {
-    var form_data = new FormData($('#upload-file')[0]);
-  }
+  // Plot histogram of territory probabilities
+  //---------------------------------------------
+  function plot_histo( data) {
+    var wp = data.white_probs
+    axutil.hit_endpoint( '/histo', [wp,20,0,1], (res) => {
+      axutil.barchart( '#histo', res, 240)
+    })
+  } // plot_histo()
+
 } // function main()

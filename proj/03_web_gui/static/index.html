@@ -235,7 +235,6 @@
        g_waiting_for_bot = true
        axutil.hit_endpoint( '/select-move/' + BOT, {'board_size': BOARD_SIZE, 'moves': g_record},
          (data) => {
-           debugger
            if ($('#status').html().startsWith( 'thinking')) {
              $('#status').html( '&nbsp;')
            }

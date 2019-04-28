@@ -77,8 +77,8 @@ class SmartRandomBot(Agent):
                         return cand
         return None
 
-    #------------------------------------
-    def select_move( self, game_state):
+    #--------------------------------------
+    def select_move( self, game_state, _):
 
         cand = self.save_atari( game_state)
         if cand:

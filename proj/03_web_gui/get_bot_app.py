@@ -48,7 +48,7 @@ def get_bot_app( bot_map):
             game_state = game_state.apply_move( next_move)
             #print_board( game_state.board)
         bot_agent = bot_map[bot_name]
-        bot_move = bot_agent.select_move( game_state)
+        bot_move = bot_agent.select_move( game_state, content['moves'])
         if bot_move is None or bot_move.is_pass:
             bot_move_str = 'pass'
         elif bot_move.is_resign:

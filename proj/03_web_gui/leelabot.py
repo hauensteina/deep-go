@@ -40,8 +40,8 @@ class LeelaBot( Agent):
         path = os.path.dirname(__file__)
         self.encoder = get_encoder_by_name( ENCODER, BSZ)
 
-    #-----------------------------------
-    def select_move( self, game_state):
+    #--------------------------------------
+    def select_move( self, game_state, _):
         best_move, best_score = self._find_move( game_state, n_best=3, n_rollouts=1, depth=10)
         return best_move
         # num_moves = BSZ * BSZ

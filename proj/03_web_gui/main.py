@@ -22,6 +22,7 @@ import tensorflow as tf
 from gotypes import Point
 from smart_random_bot import SmartRandomBot
 from leelabot import LeelaBot
+from leela_gtp_bot import LeelaGTPBot
 from get_bot_app import get_bot_app
 from sgf import Sgf_game
 from go_utils import coords_from_point, point_from_coords
@@ -61,13 +62,15 @@ def setup_models():
 
 #------------
 def main():
-    print( 'Point your browser at http://127.0.0.1:5000/static/score19.html')
+    print( 'Point your browser at http://127.0.0.1:5000/static/index.html')
     setup_models()
     smart_random_agent = SmartRandomBot()
     leelabot = LeelaBot( LEELABOTMODEL, SCOREMODEL )
+    #leela_gtp_bot = LeelaGTPBot( ['leelaz', '-w best-network', '-v 1', '--noponder', '--cpu-only']  )
+    leela_gtp_bot = LeelaGTPBot( ['leelaz', '-w', 'best-network', '--cpu-only']  )
 
     # Get an app with 'select-move/<botname>' endpoints
-    app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot} )
+    app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot, 'leela_gtp_bot':leela_gtp_bot} )
 
     #--------------------------------------
     # Add some more endpoints to the app

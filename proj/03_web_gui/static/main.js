@@ -10,7 +10,9 @@
 function main( JGO, axutil) {
   $ = axutil.$
 
-  const BOT = 'leelabot'
+  const BOT = 'leela_gtp_bot'
+  //const BOT = 'smartrandom'
+  //const BOT = 'leelabot'
   const BOARD_SIZE = 19
   const COLNAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T']
   const AUTOPLAY_MOVE_DUR_MS = 1000

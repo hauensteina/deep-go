@@ -43,7 +43,7 @@ class LeelaGTPBot( Agent):
 
             #--------------------------------------
             def wait_for_line( stream, callback):
-                global g_result
+                global g_response
                 while True:
                     line = stream.readline().decode()
                     if line:
@@ -110,7 +110,7 @@ class LeelaGTPBot( Agent):
             res = Move.pass_turn()
         elif 'resign' in resp:
             res = Move.resign()
-        elif len(resp.strip()) == 2:
+        elif len(resp.strip()) in (2,3):
             p = point_from_coords( resp)
             res = Move.play( p)
         return res
@@ -134,9 +134,9 @@ class LeelaGTPBot( Agent):
 
         # Make the moves
         color = 'b'
-        # for move in moves:
-        #     p.stdin.write( b'play %s %s' % (color, move)); p.stdin.flush()
-        #     color = 'b' if color == 'w' else 'w'
+        for move in moves:
+            self._leelaCmd( 'play %s %s' % (color, move))
+        color = 'b' if color == 'w' else 'w'
 
         # Ask for new move
         self._leelaCmd( 'genmove ' + color)

@@ -28,6 +28,8 @@ from gotypes import Point, Player
 from go_utils import point_from_coords
 
 g_response = None
+g_handler_lock = Lock()
+g_response_event = Event()
 
 MOVE_TIMEOUT = 10 # seconds
 #===========================
@@ -44,6 +46,8 @@ class LeelaGTPBot( Agent):
             #--------------------------------------
             def wait_for_line( stream, callback):
                 global g_response
+                global g_handler_lock
+                global g_response_event
                 while True:
                     line = stream.readline().decode()
                     if line:
@@ -61,8 +65,6 @@ class LeelaGTPBot( Agent):
     def __init__( self, leela_cmdline):
         Agent.__init__( self)
         self.leela_cmdline = leela_cmdline
-        self.handler_lock = Lock()
-        self.response_event = Event()
 
         self.leela_proc, self.leela_listener = self._start_leelaproc()
         atexit.register( self._kill_leela)
@@ -84,19 +86,24 @@ class LeelaGTPBot( Agent):
     #---------------------------------------------
     def _result_handler( self, leela_response):
         global g_response
+        global g_response_event
         #with self.handler_lock:
         line = leela_response
-        print( '<-- ' + line)
+        #print( '<-- ' + line)
         if '=' in line:
             resp = line.split('=')[1].strip()
-            print( '<== ' + resp)
+            #print( '<== ' + resp)
             g_response = self._resp2Move( resp)
-            self.response_event.set()
+            if g_response:
+                #print(' >>>>>>>>>>>> trigger event')
+                g_response_event.set()
 
     # Resurrect a dead Leela
     #---------------------------
     def _error_handler( self):
-        #with self.handler_lock:
+        #print( '>>>>>>>>> err handler')
+        global g_handler_lock
+        with g_handler_lock:
             print( 'Leela died. Resurrecting.')
             self._kill_leela()
             self.leela_proc, self.leela_listener = self._start_leelaproc()
@@ -122,11 +129,12 @@ class LeelaGTPBot( Agent):
         p = self.leela_proc
         p.stdin.write( cmdstr.encode('utf8'))
         p.stdin.flush()
-        print( '--> ' + cmdstr)
+        #print( '--> ' + cmdstr)
 
     #-------------------------------------------
     def select_move( self, game_state, moves):
         global g_response
+        global g_response_event
         res = None
         p = self.leela_proc
         # Reset the game
@@ -136,20 +144,22 @@ class LeelaGTPBot( Agent):
         color = 'b'
         for move in moves:
             self._leelaCmd( 'play %s %s' % (color, move))
-        color = 'b' if color == 'w' else 'w'
+            color = 'b' if color == 'w' else 'w'
 
         # Ask for new move
         self._leelaCmd( 'genmove ' + color)
-        # # Hang until the move comes back
-        # self.response_event.clear()
-        # success = self.response_event.wait( MOVE_TIMEOUT)
-        # if not success: # I guess leela died
-        #     self._error_handler()
-        #     return ''
-        time.sleep(2)
-        print( 'reponse: ' + str(g_response))
+        # Hang until the move comes back
+        #print( '>>>>>>>>> waiting')
+        success = g_response_event.wait( MOVE_TIMEOUT)
+        if not success: # I guess leela died
+            self._error_handler()
+            return None
+        #time.sleep(2)
+        #print( 'reponse: ' + str(g_response))
         if g_response:
             res = g_response
+            #print( '>>>>>>>>> cleared event')
+            g_response_event.clear()
         g_response = None
         return res
 

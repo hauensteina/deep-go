@@ -372,7 +372,7 @@ function main( JGO, axutil) {
   //--------------------------------
   function hilite_move_btn( on) {
     if (on) {
-      $('#btn_move').css('background-color','#EEEEEE')
+      //$('#btn_move').css('background-color','#EEEEEE')
       hilite_move_btn.v = true
     }
     else {

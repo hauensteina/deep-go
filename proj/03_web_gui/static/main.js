@@ -213,7 +213,8 @@ function main( JGO, axutil) {
     axutil.hit_endpoint( '/select-move/' + BOT, {'board_size': BOARD_SIZE, 'moves': g_record},
       (data) => {
         if ($('#status').html().startsWith( 'thinking')) {
-          $('#status').html( '&nbsp;')
+
+          $('#status').html( 'P(B wins): ' + parseFloat(data.diagnostics.winprob).toFixed(2))
         }
         if (data.bot_move == 'pass') {
           addMove( data.bot_move)

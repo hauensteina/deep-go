@@ -30,6 +30,7 @@ from go_utils import point_from_coords
 g_response = None
 g_handler_lock = Lock()
 g_response_event = Event()
+g_win_prob = ''
 
 MOVE_TIMEOUT = 10 # seconds
 #===========================
@@ -48,6 +49,7 @@ class LeelaGTPBot( Agent):
                 global g_response
                 global g_handler_lock
                 global g_response_event
+                global g_win_prob
                 while True:
                     line = stream.readline().decode()
                     if line:
@@ -65,13 +67,14 @@ class LeelaGTPBot( Agent):
     def __init__( self, leela_cmdline):
         Agent.__init__( self)
         self.leela_cmdline = leela_cmdline
+        self.last_move_color = ''
 
         self.leela_proc, self.leela_listener = self._start_leelaproc()
         atexit.register( self._kill_leela)
 
     #------------------------------
     def _start_leelaproc( self):
-        proc = subprocess.Popen( self.leela_cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=0)
+        proc = subprocess.Popen( self.leela_cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
         listener = LeelaGTPBot.Listener( proc.stdout,
                                          self._result_handler,
                                          self._error_handler)
@@ -87,10 +90,13 @@ class LeelaGTPBot( Agent):
     def _result_handler( self, leela_response):
         global g_response
         global g_response_event
+        global g_win_prob
         #with self.handler_lock:
         line = leela_response
-        #print( '<-- ' + line)
-        if '=' in line:
+        print( '<-- ' + line)
+        if 'NN eval=' in line:
+            g_win_prob = line.split('=')[1]
+        elif '=' in line:
             resp = line.split('=')[1].strip()
             #print( '<== ' + resp)
             g_response = self._resp2Move( resp)
@@ -123,7 +129,7 @@ class LeelaGTPBot( Agent):
         return res
 
     # Send a command to leela
-    #--------------------------
+    #-----------------------------
     def _leelaCmd( self, cmdstr):
         cmdstr += '\n'
         p = self.leela_proc
@@ -131,6 +137,7 @@ class LeelaGTPBot( Agent):
         p.stdin.flush()
         #print( '--> ' + cmdstr)
 
+    # Override Agent.select_move()
     #-------------------------------------------
     def select_move( self, game_state, moves):
         global g_response
@@ -147,6 +154,7 @@ class LeelaGTPBot( Agent):
             color = 'b' if color == 'w' else 'w'
 
         # Ask for new move
+        self.last_move_color = color
         self._leelaCmd( 'genmove ' + color)
         # Hang until the move comes back
         #print( '>>>>>>>>> waiting')
@@ -162,6 +170,12 @@ class LeelaGTPBot( Agent):
             g_response_event.clear()
         g_response = None
         return res
+
+    # Override Agent.diagnostics()
+    #------------------------------
+    def diagnostics( self):
+        global g_win_prob
+        return { 'winprob': float(g_win_prob) if self.last_move_color=='b' else 1 - float(g_win_prob) }
 
     # Turn an idx 0..360 into a move
     #---------------------------------

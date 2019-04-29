@@ -55,9 +55,10 @@ def get_bot_app( bot_map):
             bot_move_str = 'resign'
         else:
             bot_move_str = coords_from_point( bot_move.point)
+        diag =  bot_agent.diagnostics()
         return jsonify({
             'bot_move': bot_move_str,
-            'diagnostics': bot_agent.diagnostics()
+            'diagnostics': diag
         })
 
     return app

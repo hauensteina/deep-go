@@ -66,7 +66,7 @@ def main():
     setup_models()
     smart_random_agent = SmartRandomBot()
     leelabot = LeelaBot( LEELABOTMODEL, SCOREMODEL )
-    leela_cmd = 'leelaz -w best-network -v 1 --noponder --cpu-only'
+    leela_cmd = 'leelaz -w best-network -p 1 --noponder --cpu-only'
     leela_gtp_bot = LeelaGTPBot( leela_cmd.split() )
 
     # Get an app with 'select-move/<botname>' endpoints
@@ -132,6 +132,7 @@ def main():
         territory, res = compute_nn_game_result( lab, game_state.next_player)
         white_probs = lab[0].tolist()
         return jsonify( {'result':res, 'territory':territory.__dict__ , 'white_probs':white_probs} )
+
 
     @app.route('/sgf2list', methods=['POST'])
     # Convert sgf main var to coordinate list of moves

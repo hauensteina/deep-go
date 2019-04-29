@@ -215,9 +215,15 @@ function main( JGO, axutil) {
         if ($('#status').html().startsWith( 'thinking')) {
           $('#status').html( '&nbsp;')
         }
-        if (data.bot_move == 'pass' || data.bot_move == 'resign') {
+        if (data.bot_move == 'pass') {
           addMove( data.bot_move)
           g_ko = false
+          alert( 'The bot passes. Click on the Score button.')
+        }
+        else if (data.bot_move == 'resign') {
+          addMove( data.bot_move)
+          g_ko = false
+          alert( 'The bot resigns. You beat the bot!')
         }
         else {
           var botCoord = stringToCoords( data.bot_move)
@@ -258,8 +264,8 @@ function main( JGO, axutil) {
             var black_points = data.result[0]
             var white_points = data.result[1]
             var diff = Math.abs( black_points - white_points)
-            var rstr = `W+${diff}`
-            if (black_points >= white_points) { rstr = `B+${diff}` }
+            var rstr = `W+${diff} (before komi and handicap)`
+            if (black_points >= white_points) { rstr = `B+${diff}  (before komi and handicap)` }
             $('#status').html( `Black:${black_points} &emsp; White:${white_points} &emsp; ${rstr}`)
             var node = g_jrecord.createNode( true)
             for (var bpoint of data.territory.black_points) {

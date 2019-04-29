@@ -154,7 +154,8 @@ def compute_game_result( game_state):
 #----------------------------------------------------
 def compute_nn_game_result( labels, next_player):
     mid = 0.5 # Between B and W
-    tol = 0.075 # Closer to 0.5 than tol is dame. Smaller means less dame.
+    #tol = 0.075 # Closer to 0.5 than tol is dame. Smaller means less dame.
+    tol = 0.15 # Closer to 0.5 than tol is dame. Smaller means less dame.
     labels = labels[0,:]
     n_isecs = len(labels)
     boardsize = int(round(np.sqrt(n_isecs)))

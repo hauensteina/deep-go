@@ -392,6 +392,7 @@ function main( JGO, axutil) {
   //------------------------------
   function set_btn_handlers() {
     $('#btn_move').click( () => {
+      $('#histo').hide()
       hilite_move_btn(true)
       $('#status').html( 'thinking...')
       getBotMove()
@@ -400,16 +401,17 @@ function main( JGO, axutil) {
 
     $('#btn_nnscore').click( () => {
       scorePosition( 'nnscore')
+      $('#histo').show()
       return false
     })
 
-    $('#btn_prev').click( () => { gotoMove( g_record_pos - 1); set_again( '#btn_prev'); hilite_move_btn(false) })
-    $('#btn_next').click( () => { gotoMove( g_record_pos + 1); set_again( '#btn_next') })
-    $('#btn_back10').click( () => { set_again(''); gotoMove( g_record_pos - 10); hilite_move_btn(false) })
-    $('#btn_fwd10').click( () => { set_again(''); gotoMove( g_record_pos + 10) })
-    $('#btn_first').click( () => { set_again( '#btn_next'); resetGame(); hilite_move_btn(false) })
-    $('#btn_last').click( () => { set_again( '#btn_prev'); gotoMove( g_complete_record.length) })
-    $('#btn_again').click( () => { if (g_cur_btn) { $(g_cur_btn).click() } })
+    $('#btn_prev').click( () => { $('#histo').hide(); gotoMove( g_record_pos - 1); set_again( '#btn_prev'); hilite_move_btn(false) })
+    $('#btn_next').click( () => { $('#histo').hide(); gotoMove( g_record_pos + 1); set_again( '#btn_next') })
+    $('#btn_back10').click( () => { $('#histo').hide(); set_again(''); gotoMove( g_record_pos - 10); hilite_move_btn(false) })
+    $('#btn_fwd10').click( () => { $('#histo').hide(); set_again(''); gotoMove( g_record_pos + 10) })
+    $('#btn_first').click( () => { $('#histo').hide(); set_again( '#btn_next'); resetGame(); hilite_move_btn(false) })
+    $('#btn_last').click( () => { $('#histo').hide(); set_again( '#btn_prev'); gotoMove( g_complete_record.length) })
+    $('#btn_again').click( () => { if (g_cur_btn) { $('#histo').hide(); $(g_cur_btn).click() } })
   } // set_btn_handlers()
 
   // Arrow key actions

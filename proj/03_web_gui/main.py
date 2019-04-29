@@ -66,8 +66,8 @@ def main():
     setup_models()
     smart_random_agent = SmartRandomBot()
     leelabot = LeelaBot( LEELABOTMODEL, SCOREMODEL )
-    #leela_gtp_bot = LeelaGTPBot( ['leelaz', '-w best-network', '-v 1', '--noponder', '--cpu-only']  )
-    leela_gtp_bot = LeelaGTPBot( ['leelaz', '-w', 'best-network', '--cpu-only']  )
+    leela_cmd = 'leelaz -w best-network -v 1 --noponder --cpu-only'
+    leela_gtp_bot = LeelaGTPBot( leela_cmd.split() )
 
     # Get an app with 'select-move/<botname>' endpoints
     app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot, 'leela_gtp_bot':leela_gtp_bot} )

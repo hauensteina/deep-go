@@ -230,7 +230,7 @@ def main():
         return sgf
 
     @app.route('/save-sgf', methods=['GET'])
-    # Convert moves to sgf.
+    # Convert moves to sgf and return as file attachment.
     # Moves come like 'Q16D4...' to shorten URL.
     #-------------------------------------------------------------
     def save_sgf():

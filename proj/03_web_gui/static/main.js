@@ -357,7 +357,7 @@ function main( JGO, axutil) {
   function gotoMove( n) {
     var totmoves = g_complete_record.length
     if (n > totmoves) { n = totmoves }
-    if (n < 1) { n = 1 }
+    if (n < 1) { resetGame(); return }
     var record = g_complete_record.slice( 0, n)
     replayMoveList( record)
     $('#status').html( `${n} / ${totmoves}`)
@@ -411,6 +411,16 @@ function main( JGO, axutil) {
       scorePosition( 'nnscore')
       $('#histo').show()
       return false
+    })
+
+    $('#btn_pass').click( () => {
+      g_complete_record = g_record.slice()
+      g_complete_record.push( 'pass')
+      gotoMove( g_complete_record.length)
+      if (hilite_move_btn.v) {
+        $('#status').html( 'thinking...')
+        getBotMove()
+      }
     })
 
     $('#btn_prev').click( () => { $('#histo').hide(); gotoMove( g_record_pos - 1); set_again( '#btn_prev'); hilite_move_btn(false) })

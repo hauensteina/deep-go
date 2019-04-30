@@ -216,6 +216,8 @@ def main():
                 result = 'RE[%s+R]' % othercol
             elif move == 'pass':
                 movestr += ';%s[tt]' % color
+            elif move == 'A0':
+                movestr += ';%s[tt]' % color
             else:
                 #BP()
                 p = point_from_coords( move)

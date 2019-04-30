@@ -401,7 +401,12 @@ function main( JGO, axutil) {
     })
 
     $('#btn_save').click( () => {
-      var moves = g_complete_record.join('')
+      var rec = g_complete_record.slice()
+      // Kludge to manage passes
+      for (var i=0; i < rec.length; i++) {
+        if (rec[i] == 'pass') { rec[i] = 'A0' }
+      }
+      var moves = rec.join('')
       if (moves.length == 0) { return }
       var url = '/save-sgf?q=' + Math.random + '&moves=' + moves
       window.location.href = url

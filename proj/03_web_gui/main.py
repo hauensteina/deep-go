@@ -12,8 +12,12 @@
 from pdb import set_trace as BP
 import os, sys, re
 import numpy as np
+from datetime import datetime
+import uuid
+from io import BytesIO
 
-from flask import jsonify,request
+import flask
+from flask import jsonify,request,Response,send_file
 
 import keras.models as kmod
 from keras import backend as K
@@ -71,6 +75,19 @@ def main():
 
     # Get an app with 'select-move/<botname>' endpoints
     app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot, 'leela_gtp_bot':leela_gtp_bot} )
+
+    @app.after_request
+    #---------------------
+    def add_header(r):
+        """
+        Add headers to both force latest IE rendering engine or Chrome Frame,
+        and also to cache the rendered page for 10 minutes.
+        """
+        r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        r.headers["Pragma"] = "no-cache"
+        r.headers["Expires"] = "0"
+        r.headers['Cache-Control'] = 'public, max-age=0'
+        return r
 
     #--------------------------------------
     # Add some more endpoints to the app
@@ -182,8 +199,58 @@ def main():
         return jsonify( {'result': {'moves':moves, 'pb':player_black, 'pw':player_white,
                                     'winner':winner, 'komi':komi, 'fname':fname} } )
 
-    app.run( host='0.0.0.0')
+    # Convert a list of moves like ['Q16',...] to sgf
+    #---------------------------------------------------
+    def moves2sgf( moves):
+        sgf = '(;FF[4]SZ[19]\n'
+        sgf += 'SO[leela-one-playout.herokuapp.com]\n'
+        dtstr = datetime.now().strftime('%Y-%m-%d')
+        sgf += 'DT[%s]\n' % dtstr
 
+        movestr = ''
+        result = ''
+        color = 'B'
+        for move in moves:
+            othercol = 'W' if color == 'B' else 'B'
+            if move == 'resign':
+                result = 'RE[%s+R]' % othercol
+            elif move == 'pass':
+                movestr += ';%s[tt]' % color
+            else:
+                #BP()
+                p = point_from_coords( move)
+                col_s = 'abcdefghijklmnopqrstuvwxy'[p.col - 1]
+                row_s = 'abcdefghijklmnopqrstuvwxy'[19 - p.row]
+                movestr += ';%s[%s%s]' % (color,col_s,row_s)
+            color = othercol
+
+        sgf += result
+        sgf += movestr
+        sgf += ')'
+        return sgf
+
+    @app.route('/save-sgf', methods=['GET'])
+    # Convert moves to sgf.
+    # Moves come like 'Q16D4...' to shorten URL.
+    #-------------------------------------------------------------
+    def save_sgf():
+        moves = request.args.get( 'moves')
+        movearr = []
+        m = ''
+        for c in moves:
+            if c > '9': # a letter
+                if m: movearr.append(m)
+                m = c
+            else:
+                m += c
+        if m: movearr.append(m)
+        result = moves2sgf( movearr)
+        fname = uuid.uuid4().hex + '.sgf'
+        fh = BytesIO( result.encode('utf8'))
+        resp = send_file( fh, as_attachment=True, attachment_filename=fname)
+        return resp
+
+    app.run( host='0.0.0.0')
 
 if __name__ == '__main__':
     main()

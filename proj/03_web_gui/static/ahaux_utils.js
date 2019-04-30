@@ -152,7 +152,7 @@ class AhauxUtils
   // Hit any endpoint and call completion with result
   //---------------------------------------------------
   hit_endpoint( url, args, completion) {
-    if (args.constructor.name == 'File') { // Telling api to do something with a file
+    if (args.constructor.name == 'File') { // uploading a file
       var myfile = args
       //debugger
       var data = new FormData()
@@ -169,7 +169,7 @@ class AhauxUtils
           }
         )
     } // if file
-    else { // Not a file, regular api call
+    else { // Not a file upload, regular api call
       fetch( url,
         {
           method: 'POST',
@@ -187,5 +187,39 @@ class AhauxUtils
       )
     } // else
   } // hit_endpoint()
+
+  // Download a file generated on the back end,
+  // with a callback once it got here.
+  // Why is this such a nightmare?
+  //-----------------------------------------------------
+  download_file( url, args, fname, completion) {
+    let xmlhttp = new XMLHttpRequest()
+
+    xmlhttp.onreadystatechange = function(repl) {
+      if (repl.target.readyState === 4) {
+        var res = repl.currentTarget.response
+        if (navigator.msSaveOrOpenBlob) { // IE
+          navigator.msSaveOrOpenBlob( res, fname)
+        }
+        else { // All other browsers. The horror.
+          let a = document.createElement("a")
+          a.style = "display: none"
+          document.body.appendChild(a)
+          let result_url = window.URL.createObjectURL(res)
+          a.href = result_url
+          a.download = fname
+          a.click()
+          window.URL.revokeObjectURL(result_url)
+          a.remove()
+        }
+        completion( repl)
+      }
+    } // onreadystatechange()
+    xmlhttp.open('POST', url, true)
+    xmlhttp.setRequestHeader('Content-type', 'application/json');
+    xmlhttp.responseType = 'blob'
+    var json_args = JSON.stringify( args)
+    xmlhttp.send( json_args)
+  } // download_file()
 
 } // class AhauxUtils

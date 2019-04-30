@@ -400,6 +400,13 @@ function main( JGO, axutil) {
       return false
     })
 
+    $('#btn_save').click( () => {
+      var moves = g_complete_record.join('')
+      if (moves.length == 0) { return }
+      var url = '/save-sgf?q=' + Math.random + '&moves=' + moves
+      window.location.href = url
+    })
+
     $('#btn_nnscore').click( () => {
       scorePosition( 'nnscore')
       $('#histo').show()

@@ -93,7 +93,7 @@ class LeelaGTPBot( Agent):
         global g_win_prob
         #with self.handler_lock:
         line = leela_response
-        print( '<-- ' + line)
+        #print( '<-- ' + line)
         if 'NN eval=' in line:
             g_win_prob = line.split('=')[1]
         elif '=' in line:

@@ -70,6 +70,7 @@ leela_gtp_bot = LeelaGTPBot( leela_cmd.split() )
 app = get_bot_app( {'smartrandom':smart_random_agent, 'leelabot':leelabot, 'leela_gtp_bot':leela_gtp_bot} )
 
 
+'''
 @app.after_request
 #---------------------
 def add_header(r):
@@ -82,6 +83,7 @@ def add_header(r):
     r.headers["Expires"] = "0"
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
+'''
 
 #--------------------------------------
 # Add some more endpoints to the app

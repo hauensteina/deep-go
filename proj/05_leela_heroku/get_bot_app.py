@@ -12,6 +12,7 @@
 from pdb import set_trace as BP
 import os
 import numpy as np
+from datetime import datetime
 
 from flask import Flask
 # A Flask extension for handling Cross Origin Resource Sharing (CORS), making cross-origin AJAX possible.
@@ -38,7 +39,8 @@ def get_bot_app( bot_map):
     # Ask the named bot for the next move
     #--------------------------------------
     def select_move( bot_name):
-        print( '>>> select move %s %s' % (request.remote_addr, bot_name))
+        dtstr = datetime.strftime(datetime.now(),'%Y-%m-%d %H:%M:%S')
+        print( '>>> %s select move %s %s' % (dtstr, request.remote_addr, bot_name))
         content = request.json
         board_size = content['board_size']
         game_state = goboard.GameState.new_game( board_size)

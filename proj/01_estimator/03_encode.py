@@ -158,7 +158,6 @@ class ScoreDataGenerator:
     # Finds the smallest move where we can score, then scores.
     #--------------------------------------------------------------
     def score_sgf( self, sgfstr):
-        NEUTRAL_THRESH = 0.4 # Closer than this to 0.5 is neutral
         BOARDSZ = 19
 
         # Find the first index where a condition is true, by bisection.
@@ -180,7 +179,6 @@ class ScoreDataGenerator:
 
         #-------------------------
         def run_net( game_state):
-            print('>>>>> running net')
             enc  = get_encoder_by_name( 'score_threeplane_encoder', BOARDSZ)
             feat = np.array( [ enc.encode( game_state) ] )
             lab  = self.scoremodel.predict( [feat], batch_size=1)
@@ -204,20 +202,53 @@ class ScoreDataGenerator:
                     game_state = game_state.apply_move(move)
             return game_state
 
+        # A neutral point cannot border on territory.
+        # Stones cannot be neutral.
+        #---------------------------------------------
+        def bad_neutrals( white_probs, board):
+            for idx, prob in enumerate( white_probs):
+                if color( prob) != 'n': continue
+                point = self.encoder.decode_point_index( idx)
+                if board.get( point) is not None:
+                    return True
+                neighs = point.neighbors()
+                for neigh in neighs:
+                    if not board.is_on_grid( neigh): continue
+                    if board.get( neigh) is None:
+                        nidx = self.encoder.encode_point( neigh)
+                        if color( white_probs[nidx]) != 'n':
+                            return True
+            return False
+
+        #-------------------------
+        def color( wprob):
+            #NEUTRAL_THRESH = 0.40
+            #NEUTRAL_THRESH = 0.15
+            NEUTRAL_THRESH = 0.30
+            if abs(0.5 - wprob) < NEUTRAL_THRESH: return 'n'
+            elif wprob > 0.5: return 'w'
+            else: return 'b'
+
         #-----------------------------
         def scorable( moves, k):
-            COUNT_THRESH = 5
+            NEUTRAL_COUNT_THRESH = 5
             game_state = goto_move( moves, k)
             # Try to score
             _,_,white_probs = run_net( game_state)
-            neutral_count = sum( 1 for p in white_probs if abs(0.5 - p) < NEUTRAL_THRESH)
-            print( '>>>>>> move %d neutrals %d' % (k, neutral_count))
-            if neutral_count < COUNT_THRESH: return True
+            neutral_count = sum( 1 for p in white_probs if color(p) == 'n')
+            if bad_neutrals( white_probs, game_state.board): return False
+            if neutral_count < NEUTRAL_COUNT_THRESH: return True
             return False
 
         #----------------------------------------------------
         def save_sgf( sgfstr, scorable_move_idx, bpoints):
-            fname = 'tt/%s_%d_%d.sgf' %  (uuid.uuid4().hex[:7], scorable_move_idx, bpoints)
+            score = 361 - 2 * bpoints
+            if score > 0:
+                res = 'W+%d' % score
+            else:
+                res = 'B+%d' % -score
+
+            fname = 'tt/%s_%d_%s.sgf' %  (uuid.uuid4().hex[:7], scorable_move_idx, res)
             open( fname, 'w').write( sgfstr)
 
         #--------------------------------------
@@ -232,10 +263,10 @@ class ScoreDataGenerator:
                 for c in range( 1, BSZ+1):
                     p = Point( row=r, col=c)
                     prob_white = white_probs[ (r-1)*BSZ + c - 1]
-                    if prob_white > 0.5 + NEUTRAL_THRESH:
+                    if color( prob_white) == 'w':
                         terrmap[p] = 'territory_w'
                         wpoints += 1
-                    elif prob_white < 0.5 - NEUTRAL_THRESH:
+                    elif color( prob_white) == 'b':
                         terrmap[p] = 'territory_b'
                         bpoints += 1
                     else:

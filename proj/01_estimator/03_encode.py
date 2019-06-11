@@ -7,7 +7,7 @@
 # **********************************************************************/
 #
 # Encode sgf files for later NN training.
-# Simple single plane encoder from DLGG.
+# Three plane encoder from DLGG.
 #
 
 from pdb import set_trace as BP
@@ -18,6 +18,16 @@ import numpy as np
 import time
 from multiprocessing import Pool
 
+import keras.models as kmod
+from keras import backend as K
+import tensorflow as tf
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session( config=config)
+K.set_session( session)
+
+
 # Look for modules further up
 SCRIPTPATH = os.path.dirname( os.path.realpath( __file__))
 sys.path.append( re.sub(r'/proj/.*',r'/', SCRIPTPATH))
@@ -27,7 +37,7 @@ from dlgo.goboard_fast import Board, GameState, Move
 from dlgo.gotypes import Player, Point
 from dlgo.encoders.base import get_encoder_by_name
 from dlgo.utils import print_board, print_move
-from dlgo.scoring import compute_game_result
+from dlgo.scoring import compute_game_result, Territory, GameResult
 
 import pylib.ahnutil as ut
 
@@ -113,8 +123,8 @@ def worker( fname_rewinds):
                     move = Move.play( point)
                 else:
                     move = Move.pass_turn()
-                game_state = game_state.apply_move( move)
-                move_counter += 1
+                    game_state = game_state.apply_move( move)
+                    move_counter += 1
             if (rewind < 0 and move_counter == nmoves + rewind) or (rewind > 0 and move_counter == rewind):
                 encoded = g_generator.encoder.encode( game_state)
                 # Get all eight symmetries
@@ -142,26 +152,117 @@ class ScoreDataGenerator:
         self.encoder = get_encoder_by_name( encoder, self.board_sz)
         self.data_dir = data_directory
         self.fnames = ut.find( self.data_dir, '*.sgf')
+        self.scoremodel = kmod.load_model( 'nn_score.hd5')
 
-    # Return number of moves, and territory points for b,w,dame
+    # Return number of moves, and territory points for b,w,dame.
+    # Finds the smallest move where we can score, then scores.
     #--------------------------------------------------------------
     def score_sgf( self, sgfstr):
-        sgf = Sgf_game.from_string( sgfstr)
-        game_state = GameState.new_game( self.board_sz)
-        nmoves = 0
-        for item in sgf.main_sequence_iter():
-            color, move_tuple = item.get_move()
-            if color:
-                if move_tuple:
-                    row, col = move_tuple
-                    point = Point( row+1, col+1)
-                    move = Move.play( point)
+        NEUTRAL_THRESH = 0.4 # Closer than this to 0.5 is neutral
+        BOARDSZ = 19
+
+        # Find the first index where a condition is true, by bisection.
+        # This assumes that there is a point where all to the left are false,
+        # and all to the right are true.
+        #----------------------------------------------------------------------
+        def min_true( data, N, testfunc):
+            top = N-1
+            bottom = 0
+            idx = -1
+            while top >= bottom:
+                mid = int( (top+bottom) / 2 )
+                if testfunc( data, mid):
+                    top = mid-1
+                    idx = mid
                 else:
-                    move = Move.pass_turn()
-                game_state = game_state.apply_move(move)
-                nmoves += 1
-        territory, _ = compute_game_result( game_state)
-        return nmoves, territory
+                    bottom = mid+1
+            return idx
+
+        #-------------------------
+        def run_net( game_state):
+            print('>>>>> running net')
+            enc  = get_encoder_by_name( 'score_threeplane_encoder', BOARDSZ)
+            feat = np.array( [ enc.encode( game_state) ] )
+            lab  = self.scoremodel.predict( [feat], batch_size=1)
+            white_probs = lab[0].tolist()
+            return feat, lab, white_probs
+
+        #------------------------
+        def goto_move( moves, k):
+            game_state = GameState.new_game( self.board_sz)
+            # Go to move k
+            for (idx,item) in enumerate(moves):
+                if idx > k: break
+                color, move_tuple = item.get_move()
+                if color:
+                    if move_tuple:
+                        row, col = move_tuple
+                        point = Point( row+1, col+1)
+                        move = Move.play( point)
+                    else:
+                        move = Move.pass_turn()
+                    game_state = game_state.apply_move(move)
+            return game_state
+
+        #-----------------------------
+        def scorable( moves, k):
+            COUNT_THRESH = 5
+            game_state = goto_move( moves, k)
+            # Try to score
+            _,_,white_probs = run_net( game_state)
+            neutral_count = sum( 1 for p in white_probs if abs(0.5 - p) < NEUTRAL_THRESH)
+            print( '>>>>>> move %d neutrals %d' % (k, neutral_count))
+            if neutral_count < COUNT_THRESH: return True
+            return False
+
+        #----------------------------------------------------
+        def save_sgf( sgfstr, scorable_move_idx, bpoints):
+            fname = 'tt/%s_%d_%d.sgf' %  (uuid.uuid4().hex[:7], scorable_move_idx, bpoints)
+            open( fname, 'w').write( sgfstr)
+
+        #--------------------------------------
+        def score( white_probs, next_player):
+            TOTAL_POINTS = len(white_probs)
+            BSZ = int(round(np.sqrt(TOTAL_POINTS)))
+            dame = 0
+            wpoints = 0
+            bpoints = 0
+            terrmap = {}
+            for r in range( 1, BSZ+1):
+                for c in range( 1, BSZ+1):
+                    p = Point( row=r, col=c)
+                    prob_white = white_probs[ (r-1)*BSZ + c - 1]
+                    if prob_white > 0.5 + NEUTRAL_THRESH:
+                        terrmap[p] = 'territory_w'
+                        wpoints += 1
+                    elif prob_white < 0.5 - NEUTRAL_THRESH:
+                        terrmap[p] = 'territory_b'
+                        bpoints += 1
+                    else:
+                        terrmap[p] = 'dame'
+                        dame += 1
+
+            player = next_player
+            for i in range(dame):
+                if player == Player.black:
+                    bpoints += 1
+                else:
+                    wpoints += 1
+                player = player.other
+            territory = Territory( terrmap)
+            return (territory, GameResult( bpoints, wpoints, komi=0))
+        # END score()
+
+        sgf = Sgf_game.from_string( sgfstr)
+        movelist = list(sgf.main_sequence_iter())
+        N = len(movelist)
+        scorable_move_idx = min_true( movelist, N, scorable)
+        game_state = goto_move( movelist, scorable_move_idx)
+        _,_,white_probs = run_net( game_state)
+        terr, res = score( white_probs, game_state.next_player)
+        save_sgf( sgfstr, scorable_move_idx, res.b)
+        return scorable_move_idx,terr
+    # END score_sgf()
 
     # Save a chunk of features and labels and remove the chunk from input
     #----------------------------------------------------------------------
@@ -169,13 +270,13 @@ class ScoreDataGenerator:
         chunkdir = '%s/chunks' % self.data_dir
         if not os.path.exists( chunkdir):
             os.makedirs( chunkdir)
-        bname = uuid.uuid4().hex
-        featfname = chunkdir + '/%s_feat.npy' % bname
-        labfname  = chunkdir + '/%s_lab.npy' % bname
-        np.save( featfname, np.array( features[:CHUNKSIZE]))
-        np.save( labfname, np.array( labels[:CHUNKSIZE]))
-        features[:] = features[CHUNKSIZE:]
-        labels[:] = labels[CHUNKSIZE:]
+            bname = uuid.uuid4().hex
+            featfname = chunkdir + '/%s_feat.npy' % bname
+            labfname  = chunkdir + '/%s_lab.npy' % bname
+            np.save( featfname, np.array( features[:CHUNKSIZE]))
+            np.save( labfname, np.array( labels[:CHUNKSIZE]))
+            features[:] = features[CHUNKSIZE:]
+            labels[:] = labels[CHUNKSIZE:]
 
     #-------------------------------
     def encode_sgf_files( self):
@@ -188,12 +289,14 @@ class ScoreDataGenerator:
                 fname_rewinds[procnum].append( (idx, rewind) )
 
         for procnum in range( self.nprocs):
-           np.random.shuffle( fname_rewinds[procnum])
+            np.random.shuffle( fname_rewinds[procnum])
 
         # Farm out to processes
-        p = Pool( self.nprocs)
-        p.map( worker, fname_rewinds)
-        #worker( fname_rewinds[0])
+        if self.nprocs > 1:
+            p = Pool( self.nprocs)
+            p.map( worker, fname_rewinds)
+        else: # singel thread
+            worker( fname_rewinds[0])
 
 if __name__ == '__main__':
     main()

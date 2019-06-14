@@ -38,6 +38,7 @@ from dlgo.gotypes import Player, Point
 from dlgo.encoders.base import get_encoder_by_name
 from dlgo.utils import print_board, print_move
 from dlgo.scoring import compute_game_result, Territory, GameResult
+from dlgo.utils import p2idx
 
 import pylib.ahnutil as ut
 
@@ -251,29 +252,45 @@ class ScoreDataGenerator:
             fname = 'tt/%s_%d_%s.sgf' %  (uuid.uuid4().hex[:7], scorable_move_idx, res)
             open( fname, 'w').write( sgfstr)
 
+        # Fix terrmap such that all stones in a string are alive or dead.
+        # Decide by average score.
+        #----------------------------------------------------------------
+        def enforce_strings( terrmap, game_state):
+            BSZ = game_state.board.num_rows
+            strs = game_state.board.get_go_strings()
+            for gostr in strs:
+                avg_col = 0.0
+                for idx,point in enumerate(gostr.stones):
+                    prob_white = white_probs[ p2idx( point, BSZ)]
+                    avg_col = avg_col * (idx/(idx+1)) + prob_white / (idx+1)
+
+                truecolor = 'territory_b' if avg_col < 0.5 else 'territory_w'
+
+                for point in gostr.stones:
+                    terrmap[point] = truecolor
+
+            colcounts = {'territory_b':0, 'territory_w':0, 'dame':0}
+            for p in terrmap: colcounts[terrmap[p]] += 1
+            return colcounts['territory_b'],colcounts['territory_w'],colcounts['dame']
+
         #--------------------------------------
-        def score( white_probs, next_player):
-            TOTAL_POINTS = len(white_probs)
-            BSZ = int(round(np.sqrt(TOTAL_POINTS)))
-            dame = 0
-            wpoints = 0
-            bpoints = 0
+        def score( white_probs, game_state):
+            BSZ = game_state.board.num_rows
             terrmap = {}
             for r in range( 1, BSZ+1):
                 for c in range( 1, BSZ+1):
                     p = Point( row=r, col=c)
-                    prob_white = white_probs[ (r-1)*BSZ + c - 1]
+                    prob_white = white_probs[ p2idx( p, BSZ)]
                     if color( prob_white) == 'w':
                         terrmap[p] = 'territory_w'
-                        wpoints += 1
                     elif color( prob_white) == 'b':
                         terrmap[p] = 'territory_b'
-                        bpoints += 1
                     else:
                         terrmap[p] = 'dame'
-                        dame += 1
 
-            player = next_player
+            bpoints, wpoints, dame = enforce_strings( terrmap, game_state)
+
+            player = game_state.next_player
             for i in range(dame):
                 if player == Player.black:
                     bpoints += 1
@@ -290,7 +307,7 @@ class ScoreDataGenerator:
         scorable_move_idx = min_true( movelist, N, scorable)
         game_state = goto_move( movelist, scorable_move_idx)
         _,_,white_probs = run_net( game_state)
-        terr, res = score( white_probs, game_state.next_player)
+        terr, res = score( white_probs, game_state)
         save_sgf( sgfstr, scorable_move_idx, res.b)
         return scorable_move_idx,terr
     # END score_sgf()

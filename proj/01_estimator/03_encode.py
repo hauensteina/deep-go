@@ -69,7 +69,7 @@ def usage( printmsg=False):
        The --nprocs option decides how many processes to use.
     Example:
       %s --folder train
-      Output will be in train_feat.npy and train_lab.npy
+
     ''' % (name,name,name)
     if printmsg:
         print(msg)
@@ -101,9 +101,11 @@ def worker( fname_rewinds):
 
     for idx,fname_rewind in enumerate( fname_rewinds):
         if len(features) > CHUNKSIZE:
+            print( 'saving ....')
             g_generator.save_chunk( features, labels)
 
         if idx % 100 == 0:
+            print( 'len %d' % len(features))
             print( '%d / %d' % (idx, len( fname_rewinds)))
 
         # Get score and number of moves
@@ -118,6 +120,7 @@ def worker( fname_rewinds):
         for item in sgf.main_sequence_iter():
             color, move_tuple = item.get_move()
             if color:
+                move_counter += 1
                 if move_tuple:
                     row, col = move_tuple
                     point = Point( row+1, col+1)
@@ -125,7 +128,7 @@ def worker( fname_rewinds):
                 else:
                     move = Move.pass_turn()
                     game_state = game_state.apply_move( move)
-                    move_counter += 1
+
             if (rewind < 0 and move_counter == nmoves + rewind) or (rewind > 0 and move_counter == rewind):
                 encoded = g_generator.encoder.encode( game_state)
                 # Get all eight symmetries
@@ -305,6 +308,7 @@ class ScoreDataGenerator:
         movelist = list(sgf.main_sequence_iter())
         N = len(movelist)
         scorable_move_idx = min_true( movelist, N, scorable)
+        #print('min_move: %d: ' % scorable_move_idx)
         game_state = goto_move( movelist, scorable_move_idx)
         _,_,white_probs = run_net( game_state)
         terr, res = score( white_probs, game_state)
@@ -343,7 +347,7 @@ class ScoreDataGenerator:
         if self.nprocs > 1:
             p = Pool( self.nprocs)
             p.map( worker, fname_rewinds)
-        else: # singel thread
+        else: # single thread
             worker( fname_rewinds[0])
 
 if __name__ == '__main__':
